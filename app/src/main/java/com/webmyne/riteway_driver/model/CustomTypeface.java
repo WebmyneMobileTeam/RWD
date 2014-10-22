@@ -228,6 +228,7 @@ public class CustomTypeface {
         mTypefaces.put(typefaceName, typeface);
     }
 
+
     /**
      * This is a shortcut to let {@code CustomTypeface} create directly a {@link android.graphics.Typeface}
      * for you. This will create the Typeface from a file located in the assets directory.
