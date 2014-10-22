@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2014 Pau Picas Sans <pau.picas@gmail.com>
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+-->
+<resources>
+
+    <declare-styleable name="CustomTypeface">
+            <!-- A string with the name of the registered Typeface to apply to this view.
+                 Type Typeface are registered using CustomTypeface.registerTypeface()
+                 method -->
+            <attr name="customTypeface" format="string"/>
+
+            <!-- If is set to true, the defined customTypeface attributes in parents
+                 will be ignored. In this way you will be able to disable apply
+                 a custom Typeface. When is set to false if any parent defines a
+                 customTypeface, this will be applied. -->
+            <attr name="customTypefaceIgnoreParents" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="PagerSlidingTabStrip">
+        <attr name="pstsIndicatorColor" format="color" />
+        <attr name="pstsUnderlineColor" format="color" />
+        <attr name="pstsDividerColor" format="color" />
+        <attr name="pstsIndicatorHeight" format="dimension" />
+        <attr name="pstsUnderlineHeight" format="dimension" />
+        <attr name="pstsDividerPadding" format="dimension" />
+        <attr name="pstsTabPaddingLeftRight" format="dimension" />
+        <attr name="pstsScrollOffset" format="dimension" />
+        <attr name="pstsTabBackground" format="reference" />
+        <attr name="pstsShouldExpand" format="boolean" />
+        <attr name="pstsTextAllCaps" format="boolean" />
+    </declare-styleable>
+
+</resources>

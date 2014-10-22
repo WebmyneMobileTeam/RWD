@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!--  <color name="actionbar">#62aa60</color> -->
+    <color name="actionbar">#F9AF18</color>
+    <color name="activity_background">#eaeaea</color>
+    <color name="divider">#cecece</color>
+    <color name="gray_color">#666666</color>
+    <color name="ldrawer_color">#000000</color>
+    <color name="background_tab_pressed">#66cecece</color>
+    <color name="background_tab">#fafafa</color>
+
+</resources>

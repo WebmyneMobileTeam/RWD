@@ -1,0 +1,20 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.webmyne.riteway_driver.my_orders.MyOrdersFragment">
+
+    <com.webmyne.riteway_driver.model.PagerSlidingTabStrip
+        android:layout_alignParentTop="true"
+        android:id="@+id/my_order_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="48dip"
+        android:background="@color/background_tab"/>
+
+    <android.support.v4.view.ViewPager
+        android:layout_below="@+id/my_order_tabs"
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+      />
+</RelativeLayout>
