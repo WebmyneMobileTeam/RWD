@@ -1,18 +1,27 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.webmyne.riteway_driver.my_orders.OrderDetailActivity$PlaceholderFragment">
 
-    <!--order details list with sections-->
 
-    <com.webmyne.riteway_driver.model.PinnedHeaderListView
-        android:id="@+id/orderDetailListView"
+    <com.webmyne.riteway_driver.CustomViews.CustomHeaderView
         android:layout_width="match_parent"
-        android:dividerHeight="1dp"
-        android:divider="#d1d1d1"
-        android:layout_height="match_parent">
-    </com.webmyne.riteway_driver.model.PinnedHeaderListView>
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/activity_margin"
+        app:titleText="Customer Information"
+        android:layout_height="wrap_content">
 
-</RelativeLayout>
+
+
+
+
+    </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
+
+
+
+
+
+</LinearLayout>

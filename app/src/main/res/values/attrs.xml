@@ -43,4 +43,9 @@
         <attr name="pstsTextAllCaps" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="CustomHeaderView">
+        <attr name="titleText" format="string" localization="suggested" />
+
+    </declare-styleable>
+
 </resources>
