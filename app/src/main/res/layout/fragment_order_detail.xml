@@ -12,12 +12,24 @@
         android:orientation="vertical"
         android:layout_marginTop="@dimen/activity_margin"
         app:titleText="Customer Information"
-        android:layout_height="wrap_content">
+        android:layout_height="100dp">
+    </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
 
+    <com.webmyne.riteway_driver.CustomViews.CustomHeaderView
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/activity_margin"
+        app:titleText="Trip Information"
 
+        android:layout_height="100dp">
+    </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
 
-
-
+    <com.webmyne.riteway_driver.CustomViews.CustomHeaderView
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/activity_margin"
+        app:titleText="Payment Information"
+        android:layout_height="100dp">
     </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
 
 
