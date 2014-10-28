@@ -9,4 +9,5 @@
     android:background="@color/actionbar"
     tools:context=".Launcher$PlaceholderFragment">
 
+
 </RelativeLayout>

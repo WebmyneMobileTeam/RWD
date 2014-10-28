@@ -68,7 +68,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("onResume ", "in drawer activty");
+//        Log.e("onResume ", "in drawer activty");
     }
 
     private void initFields() {

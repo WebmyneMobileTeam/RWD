@@ -13,7 +13,7 @@
         android:paddingLeft="@dimen/activity_margin"
         android:paddingRight="@dimen/activity_margin"
 
-        app:customTypeface="rbold"
+        app:customTypeface="@string/bold"
         android:textColor="#d1d1d1"
         tools:ignore="MissingPrefix"
         android:id="@+id/txtDrawerItem"

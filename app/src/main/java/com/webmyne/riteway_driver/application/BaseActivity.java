@@ -54,15 +54,6 @@ public class BaseActivity extends FragmentActivity {
 
 
     }
-    // Check Internet Connection
-    public  boolean isConnected() {
 
-        ConnectivityManager cm =(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-        return  isConnected;
-    }
 
 }

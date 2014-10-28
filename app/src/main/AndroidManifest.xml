@@ -24,6 +24,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    //GCM
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission android:name="com.webmyne.riteway_driver.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.webmyne.riteway_driver.permission.C2D_MESSAGE" />
     <application
         android:name=".application.MyApplication"
         android:allowBackup="true"
@@ -55,6 +62,16 @@
             android:name=".my_orders.OrderDetailActivity"
             android:label="@string/title_activity_order_detail" >
         </activity>
+
+        <receiver
+            android:name=".GCM.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.webmyne.riteway_driver" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".GCM.GcmMessageHandler" />
     </application>
 
 </manifest>
