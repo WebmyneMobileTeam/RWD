@@ -19,6 +19,7 @@
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@+id/orderHistoryDate"
         android:paddingLeft="@dimen/activity_margin"
+
         android:id="@+id/orderHistoryCname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -19,6 +19,7 @@
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@+id/currentOrderDate"
         android:paddingLeft="@dimen/activity_margin"
+
         android:id="@+id/currentOrderCname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,6 +36,7 @@
         android:layout_centerVertical="true"
         android:id="@+id/currentOrderDate"
         android:layout_width="wrap_content"
+
         android:layout_height="wrap_content"
         android:singleLine="true"
         app:customTypeface="@string/light"

@@ -4,6 +4,8 @@
     android:id="@+id/parentDialog"
     android:orientation="vertical" android:layout_width="match_parent"
     android:background="#50000000"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:clickable="true"
     android:layout_height="match_parent">
 
@@ -20,6 +22,8 @@
             android:id="@+id/titleDialog"
             android:text="Title"
             android:paddingTop="4dp"
+            app:customTypeface="@string/bold"
+            tools:ignore="MissingPrefix"
             android:clickable="true"
             android:paddingBottom="4dp"
             android:layout_width="match_parent"
@@ -33,6 +37,8 @@
             android:id="@+id/listDialog"
             android:layout_width="match_parent"
             android:layout_height="170dp"
+            app:customTypeface="@string/normal"
+            tools:ignore="MissingPrefix"
             android:background="@android:color/white"
             android:paddingTop="@dimen/activity_margin"
             android:dividerHeight="1dp" />
