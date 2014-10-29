@@ -102,9 +102,13 @@ public class Launcher extends Activity {
                     new CountDownTimer(2500, 1000) {
                        @Override
                         public void onFinish() {
-                            Intent i = new Intent(getActivity(), DrawerActivity.class);
-                            startActivity(i);
-                            getActivity().finish();
+                           try {
+                               Intent i = new Intent(getActivity(), DrawerActivity.class);
+                               startActivity(i);
+                               getActivity().finish();
+                           } catch (NullPointerException e){
+                               e.printStackTrace();
+                           }
                         }
                         @Override
                         public void onTick(long millisUntilFinished) {
