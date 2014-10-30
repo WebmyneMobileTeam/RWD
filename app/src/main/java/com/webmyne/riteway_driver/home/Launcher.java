@@ -138,12 +138,23 @@ public class Launcher extends Activity {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-
+                String SENDER_ID="APA91bHGfPgU7dKGF6cbBX8xhPePRTWdXooX2ZkFRDgVjNpcSWogjoUxYsbtrJH0MimExsdtpNMO_Clapjm1blkWxGuWwqB3WrerMBA-uh48CtXlIauvZj6hfEwefWDqApz37xELI4hrjRFW0yLBNTHCOMOP7IPqKg";
                     try {
                         if (gcm == null) {
                             gcm = GoogleCloudMessaging.getInstance(getActivity());
                         }
                         regid = gcm.register(PROJECT_NUMBER);
+                        try {
+                            Bundle data = new Bundle();
+                            data.putString("my_message", "Hello World");
+                            data.putString("my_action",
+                                    "com.google.android.gcm.demo.app.ECHO_NOW");
+                            String id = Integer.toString(2);
+                            gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
+//                            msg = "Sent message";
+                        } catch (IOException ex) {
+//                            msg = "Error :" + ex.getMessage();
+                        }
 
                         Log.e("GCM ID :", regid);
                         if(regid==null || regid==""){
