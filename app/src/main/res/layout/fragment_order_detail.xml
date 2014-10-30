@@ -7,7 +7,7 @@
     tools:context="com.webmyne.riteway_driver.my_orders.OrderDetailActivity$PlaceholderFragment">
 
 
-    <com.webmyne.riteway_driver.CustomViews.CustomHeaderView
+    <com.webmyne.riteway_driver.customViews.CustomHeaderView
         android:layout_width="match_parent"
         app:customTypeface="@string/bold"
         tools:ignore="MissingPrefix"
@@ -15,9 +15,9 @@
         android:layout_marginTop="@dimen/activity_margin"
         app:titleText="Customer Information"
         android:layout_height="100dp">
-    </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
+    </com.webmyne.riteway_driver.customViews.CustomHeaderView>
 
-    <com.webmyne.riteway_driver.CustomViews.CustomHeaderView
+    <com.webmyne.riteway_driver.customViews.CustomHeaderView
         android:layout_width="match_parent"
         android:orientation="vertical"
         app:customTypeface="@string/bold"
@@ -26,9 +26,9 @@
         app:titleText="Trip Information"
 
         android:layout_height="100dp">
-    </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
+    </com.webmyne.riteway_driver.customViews.CustomHeaderView>
 
-    <com.webmyne.riteway_driver.CustomViews.CustomHeaderView
+    <com.webmyne.riteway_driver.customViews.CustomHeaderView
         android:layout_width="match_parent"
         android:orientation="vertical"
         app:customTypeface="@string/bold"
@@ -36,7 +36,7 @@
         android:layout_marginTop="@dimen/activity_margin"
         app:titleText="Payment Information"
         android:layout_height="100dp">
-    </com.webmyne.riteway_driver.CustomViews.CustomHeaderView>
+    </com.webmyne.riteway_driver.customViews.CustomHeaderView>
 
 
 

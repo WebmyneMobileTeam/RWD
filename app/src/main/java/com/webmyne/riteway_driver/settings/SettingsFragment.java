@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.webmyne.riteway_driver.CustomViews.ListDialog;
+import com.webmyne.riteway_driver.customViews.ListDialog;
 import com.webmyne.riteway_driver.R;
 
 import java.util.ArrayList;
