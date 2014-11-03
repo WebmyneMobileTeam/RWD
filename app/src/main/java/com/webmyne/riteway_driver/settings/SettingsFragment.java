@@ -55,6 +55,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     }
 
     public void showDialog() {
+
         ListDialog listDialog = new ListDialog(getActivity(), android.R.style.Theme_Translucent_NoTitleBar);
         listDialog.setCancelable(true);
         listDialog.setCanceledOnTouchOutside(true);

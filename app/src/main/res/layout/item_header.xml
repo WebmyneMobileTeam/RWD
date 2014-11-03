@@ -11,14 +11,13 @@
         android:text="CustomerInfo"
         android:singleLine="true"
         android:layout_width="wrap_content"
-        app:customTypeface="@string/bold"
+        app:customTypeface="@string/light"
         tools:ignore="MissingPrefix"
         android:layout_height="wrap_content"
-        android:textColor="#000"
+        android:textColor="#414141"
         android:gravity="center"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:background="@drawable/header_background"
         android:textSize="@dimen/text_size_medium" />
 
     <LinearLayout

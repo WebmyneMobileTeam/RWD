@@ -48,6 +48,7 @@ public class Launcher extends Activity {
      * A placeholder fragment containing a splash screen.
      */
     public static class PlaceholderFragment extends Fragment {
+        private String SENDER_ID = "APA91bHIJEaJh9884pbCBwdxhVicsiFHgvvBehNghl2OMSQXmJKUb9Q5A0MET1bzPRmDyc6nwNRcrlDhIuumlPM-f4jUUufwzMwxVq07OcYids6AYIu2qUv3yGdEgWxDzLWZrepWbW0pUImE6YdaOx8lU7_54iMPyhArFXR2ld1XtkW9QBOFTug";
 
         GoogleCloudMessaging gcm;
         String regid;
@@ -81,6 +82,7 @@ public class Launcher extends Activity {
 
 
         public boolean isFirstTime() {
+
             SharedPreferences preferences = getActivity().getSharedPreferences("run_before", MODE_PRIVATE);
             boolean ranBefore = preferences.getBoolean("RanBefore", false);
             if (!ranBefore) {
@@ -155,6 +157,24 @@ public class Launcher extends Activity {
                         } catch (IOException ex) {
 //                            msg = "Error :" + ex.getMessage();
                         }
+
+
+                        String msg = "";
+                        try {
+                            Bundle data = new Bundle();
+                            data.putString("my_message", "Hello World");
+                            data.putString("my_action",
+                                    "com.google.android.gcm.demo.app.ECHO_NOW");
+
+                            String id = Integer.toString(1);
+                            gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
+                            msg = "Sent message";
+                        } catch (IOException ex) {
+                            msg = "Error :" + ex.getMessage();
+                        }
+
+
+
 
                         Log.e("GCM ID :", regid);
                         if(regid==null || regid==""){

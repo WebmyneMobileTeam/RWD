@@ -27,23 +27,16 @@ public class CustomHeaderView extends LinearLayout{
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.CustomHeaderView, 0, 0);
         String titleText = a.getString(R.styleable.CustomHeaderView_titleText);
-
         a.recycle();
-
         setOrientation(LinearLayout.VERTICAL);
         setGravity(Gravity.CENTER_VERTICAL);
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.item_header, this, true);
-
         TextView tv = (TextView)this.findViewById(R.id.txtHeaderCustomView);
         tv.setText(titleText);
-
         TextView tvSubTitle = (TextView)this.findViewById(R.id.txtHeaderSubTitle);
-
-
-
 
     }
 

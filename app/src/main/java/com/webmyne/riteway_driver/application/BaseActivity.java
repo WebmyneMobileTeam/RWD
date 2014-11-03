@@ -52,7 +52,6 @@ public class BaseActivity extends FragmentActivity {
         txtHeader.setMaxWidth((int)(getResources().getDisplayMetrics().widthPixels/2));
 
 
-
     }
 
 
