@@ -1,23 +1,15 @@
 package com.webmyne.riteway_driver.my_orders;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
+
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
-import com.webmyne.riteway_driver.model.PinnedHeaderListView;
-import com.webmyne.riteway_driver.model.SectionedBaseAdapter;
-import com.webmyne.riteway_driver.model.ViewHolder;
-
-import java.util.ArrayList;
 
 public class OrderDetailActivity extends BaseActivity {
 

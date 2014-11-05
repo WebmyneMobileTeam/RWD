@@ -33,11 +33,11 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     private DrawerLayout drawer;
     private ListView leftDrawerList;
 
-    private String[] leftSliderData = {"CURRENT TRIP", "MY ORDERS", "MY PROFILE","NOTIFICATIONS", "SETTINGS"};
+    private String[] leftSliderData = {"CURRENT TRIP", "MY ORDERS", "NOTIFICATIONS", "SETTINGS"};
 
     public static String CURRENT_TRIP = "current_trip";
     public static String MY_ORDERS = "my_orders";
-    public static String MY_PROFILE = "my_profile";
+
     public static String NOTIFICATIONS = "notifications";
     public static String SETTINGS = "settings";
 
@@ -133,15 +133,8 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
                 txtHeader.setText("MY ORDERS");
                 break;
 
-            case 2:
-                MyProfileFragment myProfileFragment = MyProfileFragment.newInstance("", "");
-                if (manager.findFragmentByTag(MY_PROFILE) == null) {
-                    ft.replace(R.id.main_content, myProfileFragment,MY_PROFILE).commit();
-                }
-                txtHeader.setText("MY PROFILE");
-                break;
 
-            case 3:
+            case 2:
                 NotificationFragment notificationFragment = NotificationFragment.newInstance("", "");
                 if (manager.findFragmentByTag(NOTIFICATIONS) == null) {
                     ft.replace(R.id.main_content, notificationFragment,NOTIFICATIONS).commit();
@@ -149,7 +142,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
                 txtHeader.setText("NOTIFICATIONS");
                 break;
 
-            case 4:
+            case 3:
                 SettingsFragment settingsFragment = SettingsFragment.newInstance("", "");
                 if (manager.findFragmentByTag(SETTINGS) == null) {
                     ft.replace(R.id.main_content, settingsFragment,SETTINGS).commit();

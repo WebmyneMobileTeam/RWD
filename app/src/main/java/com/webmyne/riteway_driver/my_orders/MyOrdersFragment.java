@@ -37,8 +37,7 @@ public class MyOrdersFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         View convertView=inflater.inflate(R.layout.fragment_my_orders, container, false);
         tabs = (PagerSlidingTabStrip)convertView.findViewById(R.id.my_order_tabs);
         pager = (ViewPager) convertView.findViewById(R.id.pager);
@@ -61,7 +60,7 @@ public class MyOrdersFragment extends Fragment {
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-        private final String[] TITLES = { "Current Orders", "History" };
+        private final String[] TITLES = { "Current", "History" };
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
