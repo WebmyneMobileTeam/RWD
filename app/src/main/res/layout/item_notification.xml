@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/divider"
+        android:layout_height="1dp"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin"
+        android:paddingTop="@dimen/activity_margin"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txtMessageTitle"
+            android:layout_alignParentLeft="true"
+            android:layout_width="match_parent"
+            android:text="Title"
+            android:singleLine="true"
+            android:layout_toLeftOf="@+id/txtNotificationDate"
+            android:textColor="@android:color/black"
+            app:customTypeface="@string/bold"
+            tools:ignore="MissingPrefix"
+            android:textStyle="bold"
+            android:textSize="@dimen/text_size_large"
+
+            android:layout_height="wrap_content" />
+        <TextView
+           android:layout_alignBottom="@+id/txtMessageTitle"
+          android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:id="@+id/txtNotificationDate"
+            android:layout_width="wrap_content"
+            android:text="11/10/1991"
+            android:textColor="@android:color/darker_gray"
+            app:customTypeface="@string/light"
+            tools:ignore="MissingPrefix"
+            android:textStyle="bold"
+            android:textSize="@dimen/text_size_medium"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin"
+        android:paddingBottom="@dimen/activity_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/txtNotificationMessage"
+            android:layout_alignParentLeft="true"
+            android:layout_width="match_parent"
+            android:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+            android:layout_toLeftOf="@+id/txtNotificationTime"
+            android:textColor="@android:color/black"
+            app:customTypeface="@string/normal"
+            tools:ignore="MissingPrefix"
+
+            android:textSize="@dimen/text_size_medium"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_alignParentRight="true"
+            android:id="@+id/txtNotificationTime"
+            android:layout_width="wrap_content"
+            android:text="9:00AM"
+            android:textColor="@android:color/darker_gray"
+            app:customTypeface="@string/light"
+            tools:ignore="MissingPrefix"
+            android:gravity="bottom"
+            android:layout_alignBottom="@+id/txtNotificationMessage"
+
+            android:textSize="@dimen/text_size_medium"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:background="@color/divider"
+        android:layout_height="1dp"/>
+</LinearLayout>

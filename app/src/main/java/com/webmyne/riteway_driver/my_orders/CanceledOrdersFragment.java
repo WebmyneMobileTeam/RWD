@@ -3,6 +3,7 @@ package com.webmyne.riteway_driver.my_orders;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.support.v4.app.Fragment;
@@ -18,30 +19,30 @@ import com.webmyne.riteway_driver.customViews.ListDialog;
 
 import java.util.ArrayList;
 
-
-public class OrdersHistoryFragment extends Fragment implements ListDialog.setSelectedListner {
-
-    ListView ordersHistoryListView;
-    OrdersHistoryAdapter ordersHistoryAdapter;
-    TextView txtDateSelection;
-    ArrayList<String> ordersHistoryList =new ArrayList<String>();
+public class CanceledOrdersFragment extends Fragment implements ListDialog.setSelectedListner{
+    ListView ordersCanceledListView;
+    OrdersCanceledAdapter ordersCanceledAdapter;
+    ArrayList<String> ordersCanceledList =new ArrayList<String>();
+    TextView txtDateSelectionForOrderCancel;
     ArrayList<String> dateSelectionArray=new ArrayList<String>();
-    public static OrdersHistoryFragment newInstance(String param1, String param2) {
-        OrdersHistoryFragment fragment = new OrdersHistoryFragment();
+    public static CanceledOrdersFragment newInstance(String param1, String param2) {
+        CanceledOrdersFragment fragment = new CanceledOrdersFragment();
+
         return fragment;
     }
-    public OrdersHistoryFragment() {
+
+    public CanceledOrdersFragment() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ordersHistoryList.add("one");
-        ordersHistoryList.add("two");
-        ordersHistoryList.add("three");
-        ordersHistoryList.add("four");
-        ordersHistoryList.add("five");
+        ordersCanceledList.add("one");
+        ordersCanceledList.add("two");
+        ordersCanceledList.add("three");
+        ordersCanceledList.add("four");
+        ordersCanceledList.add("five");
 
         dateSelectionArray.add("Current Week");
         dateSelectionArray.add("Last Week");
@@ -53,27 +54,25 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View convertView=inflater.inflate(R.layout.fragment_orders_history, container, false);
-        txtDateSelection=(TextView)convertView.findViewById(R.id.txtDateSelection);
-        txtDateSelection.setOnClickListener(new View.OnClickListener() {
+        View convertView= inflater.inflate(R.layout.fragment_canceled_orders, container, false);
+        txtDateSelectionForOrderCancel=(TextView)convertView.findViewById(R.id.txtDateSelectionForOrderCancel);
+        txtDateSelectionForOrderCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDialog();
             }
         });
-        ordersHistoryListView =(ListView)convertView.findViewById(R.id.ordersHistoryList);
-        ordersHistoryAdapter =new OrdersHistoryAdapter(getActivity(), ordersHistoryList);
-        ordersHistoryListView.setAdapter(ordersHistoryAdapter);
-        return convertView;
+        ordersCanceledListView =(ListView)convertView.findViewById(R.id.canceledOrdersList);
+        ordersCanceledAdapter =new OrdersCanceledAdapter(getActivity(), ordersCanceledList);
+        ordersCanceledListView.setAdapter(ordersCanceledAdapter);
+        return  convertView;
     }
-
-
-    public class OrdersHistoryAdapter extends BaseAdapter {
+    public class OrdersCanceledAdapter extends BaseAdapter {
 
         Context context;
         ArrayList<String> currentOrdersList;
 
-        public OrdersHistoryAdapter(Context context, ArrayList<String> currentOrdersList) {
+        public OrdersCanceledAdapter(Context context, ArrayList<String> currentOrdersList) {
             this.context = context;
             this.currentOrdersList = currentOrdersList;
         }
@@ -101,13 +100,13 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
             LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
             if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.item_ordered_history, parent, false);
+                convertView = mInflater.inflate(R.layout.item_canceled_orders, parent, false);
                 holder = new ViewHolder();
-                holder.orderHistoryCname=(TextView)convertView.findViewById(R.id.orderHistoryCname);
-                holder.orderHistoryDate=(TextView)convertView.findViewById(R.id.orderHistoryDate);
-                holder.orderHistoryPickupLocation=(TextView)convertView.findViewById(R.id.orderHistoryPickupLocation);
-                holder.orderHistoryDropoffLocation=(TextView)convertView.findViewById(R.id.orderHistoryDropoffLocation);
-                holder.orderHistoryStatus=(TextView)convertView.findViewById(R.id.orderHistoryStatus);
+                holder.orderHistoryCname=(TextView)convertView.findViewById(R.id.orderCanceledCname);
+                holder.orderHistoryDate=(TextView)convertView.findViewById(R.id.orderCanceledDate);
+                holder.orderHistoryPickupLocation=(TextView)convertView.findViewById(R.id.orderCanceledPickupLocation);
+                holder.orderHistoryDropoffLocation=(TextView)convertView.findViewById(R.id.orderCanceledDropoffLocation);
+                holder.orderHistoryStatus=(TextView)convertView.findViewById(R.id.orderCanceledStatus);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -145,7 +144,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     @Override
     public void selected(String value) {
 
-        txtDateSelection.setText("Filtered By "+value);
+        txtDateSelectionForOrderCancel.setText("Filtered By "+value);
 
     }
 }

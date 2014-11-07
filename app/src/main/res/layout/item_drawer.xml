@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+    >
+
+<TextView
+    android:layout_alignParentLeft="true"
+    android:layout_toLeftOf="@+id/txtBadgeValue"
+    android:paddingBottom="8dp"
+    android:paddingTop="8dp"
+    android:paddingLeft="@dimen/activity_margin"
+    android:layout_centerVertical="true"
+    android:paddingRight="@dimen/activity_margin"
+    app:customTypeface="rbold"
+    android:textColor="#d1d1d1"
+    tools:ignore="MissingPrefix"
+    android:id="@+id/txtDrawerItem"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:textSize="@dimen/text_size_medium"/>
 
-    <TextView
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:paddingLeft="@dimen/activity_margin"
-        android:paddingRight="@dimen/activity_margin"
+<TextView
+    android:visibility="gone"
+    android:layout_alignParentRight="true"
+    android:gravity="center"
+    android:padding="4dp"
+    android:layout_centerVertical="true"
+    android:id="@+id/txtBadgeValue"
+    android:text="5"
+    android:background="@drawable/badge_green"
+    android:layout_width="32dp"
+    android:layout_height="32dp"
+    android:textColor="@android:color/black"
+    android:textSize="@dimen/text_size_small" />
 
-        app:customTypeface="@string/bold"
-        android:textColor="#d1d1d1"
-        tools:ignore="MissingPrefix"
-        android:id="@+id/txtDrawerItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/text_size_medium">
 
- </TextView>
-
-</LinearLayout>
+</RelativeLayout>

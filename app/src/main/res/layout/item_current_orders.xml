@@ -24,9 +24,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        app:customTypeface="@string/normal"
+        app:customTypeface="@string/bold"
+        android:textStyle="bold"
         tools:ignore="MissingPrefix"
-        android:text="Mr. XYZ"
+        android:text="Customer Name"
         android:textSize="@dimen/text_size_medium"
         android:textColor="@android:color/black"
         />
@@ -73,6 +74,20 @@
         android:text="Dropoff Location"
         android:textSize="@dimen/text_size_medium"
         android:textColor="@android:color/black"/>
+
+    <TextView
+        android:paddingRight="@dimen/activity_margin"
+        android:paddingLeft="@dimen/activity_margin"
+        android:id="@+id/orderHistoryStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:customTypeface="@string/normal"
+        tools:ignore="MissingPrefix"
+        android:singleLine="true"
+        android:text="Status: In Progress"
+        android:textSize="@dimen/text_size_medium"
+        android:textColor="@android:color/black"/>
+
     <TextView
         android:paddingRight="@dimen/activity_margin"
         android:paddingLeft="@dimen/activity_margin"

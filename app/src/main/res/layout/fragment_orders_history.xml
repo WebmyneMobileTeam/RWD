@@ -2,21 +2,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/activity_background"
     >
 
     <ListView
         android:layout_marginTop="@dimen/activity_margin"
-        android:layout_marginBottom="@dimen/activity_margin"
+        android:layout_alignParentTop="true"
         android:background="@android:color/white"
         android:id="@+id/ordersHistoryList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:dividerHeight="@dimen/activity_margin"
+        android:layout_above="@+id/viewDivider"
         android:drawSelectorOnTop="true"
         android:divider="@color/activity_background">
     </ListView>
 
+    <View
+        android:id="@+id/viewDivider"
+        android:layout_above="@+id/txtDateSelection"
 
+        android:layout_width="match_parent"
+        android:background="@color/actionbar"
+        android:layout_height="1dp"/>
+
+    <TextView
+        android:id="@+id/txtDateSelection"
+        android:padding="4dp"
+        android:gravity="center"
+        android:background="@color/actionbar"
+        android:layout_alignParentBottom="true"
+        android:textSize="@dimen/text_size_medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:customTypeface="@string/bold"
+        tools:ignore="MissingPrefix"
+        android:text="Filtered By Current Week"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
 </RelativeLayout>

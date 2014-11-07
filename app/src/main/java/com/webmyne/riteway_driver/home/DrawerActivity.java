@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +21,7 @@ import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
 import com.webmyne.riteway_driver.model.CustomTypeface;
 import com.webmyne.riteway_driver.my_orders.MyOrdersFragment;
-import com.webmyne.riteway_driver.my_profile.MyProfileFragment;
+import com.webmyne.riteway_driver.my_orders.OrderDetailActivity;
 import com.webmyne.riteway_driver.notifications.NotificationFragment;
 import com.webmyne.riteway_driver.settings.SettingsFragment;
 import com.webmyne.riteway_driver.trip.CurrentTripFragment;
@@ -47,6 +46,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
         return CustomTypeface.getInstance().createView(name, context, attrs);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +68,18 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     @Override
     protected void onResume() {
         super.onResume();
-//        Log.e("onResume ", "in drawer activty");
+        if(OrderDetailActivity.isAcceptRequest==true){
+            OrderDetailActivity.isAcceptRequest=false;
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction ft = manager.beginTransaction();
+
+            CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
+            if (manager.findFragmentByTag(CURRENT_TRIP) == null) {
+                ft.replace(R.id.main_content, currentTripFragment,CURRENT_TRIP).commit();
+            }
+            txtHeader.setText("CURRENT TRIP");
+
+        }
     }
 
     private void initFields() {
@@ -201,6 +212,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
 
         public class ViewHolder {
             TextView txtDrawerItem;
+            TextView txtBadgeValue;
         }
 
 
@@ -214,9 +226,15 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
                 convertView = mInflater.inflate(R.layout.item_drawer, parent, false);
                 holder = new ViewHolder();
                 holder.txtDrawerItem = (TextView) convertView.findViewById(R.id.txtDrawerItem);
+                holder.txtBadgeValue = (TextView) convertView.findViewById(R.id.txtBadgeValue);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
+            }
+            if(position==2) {
+                holder.txtBadgeValue.setVisibility(View.VISIBLE);
+            } else {
+                holder.txtBadgeValue.setVisibility(View.GONE);
             }
             holder.txtDrawerItem.setText(leftSliderData[position]);
             return convertView;

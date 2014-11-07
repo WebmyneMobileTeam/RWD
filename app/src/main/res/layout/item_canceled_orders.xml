@@ -12,39 +12,39 @@
         android:background="@color/divider"
         android:layout_height="1dp"/>
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <TextView
-        android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@+id/orderHistoryDate"
-        android:paddingLeft="@dimen/activity_margin"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/orderCanceledDate"
+            android:paddingLeft="@dimen/activity_margin"
 
-        android:id="@+id/orderHistoryCname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        app:customTypeface="@string/bold"
-        android:textStyle="bold"
-        tools:ignore="MissingPrefix"
-        android:text="Customer Name"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="@android:color/black"
-        />
-    <TextView
-        android:layout_alignParentRight="true"
-        android:paddingRight="@dimen/activity_margin"
-        android:layout_centerVertical="true"
-        android:id="@+id/orderHistoryDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        app:customTypeface="@string/light"
-        tools:ignore="MissingPrefix"
-        android:text="21-10-14  6:00pm"
-        android:textColor="@color/gray_color"
-        android:textSize="@dimen/text_size_small"
-        />
+            android:id="@+id/orderCanceledCname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textStyle="bold"
+            app:customTypeface="@string/bold"
+            tools:ignore="MissingPrefix"
+            android:text="Customer Name"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="@android:color/black"
+            />
+        <TextView
+            android:layout_alignParentRight="true"
+            android:paddingRight="@dimen/activity_margin"
+            android:layout_centerVertical="true"
+            android:id="@+id/orderCanceledDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            app:customTypeface="@string/light"
+            tools:ignore="MissingPrefix"
+            android:text="21-10-14  6:00pm"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/text_size_small"
+            />
 
     </RelativeLayout>
 
@@ -53,7 +53,7 @@
     <TextView
         android:paddingRight="@dimen/activity_margin"
         android:paddingLeft="@dimen/activity_margin"
-        android:id="@+id/orderHistoryPickupLocation"
+        android:id="@+id/orderCanceledPickupLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:customTypeface="@string/normal"
@@ -65,7 +65,7 @@
     <TextView
         android:paddingRight="@dimen/activity_margin"
         android:paddingLeft="@dimen/activity_margin"
-        android:id="@+id/orderHistoryDropoffLocation"
+        android:id="@+id/orderCanceledDropoffLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
@@ -77,15 +77,16 @@
     <TextView
         android:paddingRight="@dimen/activity_margin"
         android:paddingLeft="@dimen/activity_margin"
-        android:id="@+id/orderHistoryStatus"
+        android:id="@+id/orderCanceledStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:customTypeface="@string/normal"
         tools:ignore="MissingPrefix"
         android:singleLine="true"
-        android:text="Status: Success"
+        android:text="Status: Canceled By Driver"
         android:textSize="@dimen/text_size_medium"
         android:textColor="@android:color/black"/>
+
     <TextView
         android:paddingRight="@dimen/activity_margin"
         android:paddingLeft="@dimen/activity_margin"
@@ -97,7 +98,8 @@
         android:singleLine="true"
         android:text="$250.00"
         android:textSize="@dimen/text_size_medium"
-        android:textColor="@color/gray_color"/>
+        android:textColor="@android:color/darker_gray"/>
+
     <View
         android:layout_width="match_parent"
         android:background="@color/divider"

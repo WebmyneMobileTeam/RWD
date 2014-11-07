@@ -60,7 +60,7 @@ public class MyOrdersFragment extends Fragment {
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-        private final String[] TITLES = { "Current", "History" };
+        private final String[] TITLES = { "Current", "History", "Canceled" };
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -83,6 +83,8 @@ public class MyOrdersFragment extends Fragment {
                 fragment=CurrentOrdersFragment.newInstance("","");
             } else if(i==1) {
                 fragment=OrdersHistoryFragment.newInstance("","");
+            } else if(i==2) {
+                fragment=CanceledOrdersFragment.newInstance("","");
             }
             return fragment;
         }
