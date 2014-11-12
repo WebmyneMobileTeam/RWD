@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,12 +24,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.gson.GsonBuilder;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
+import com.webmyne.riteway_driver.application.MyApplication;
+import com.webmyne.riteway_driver.customViews.CallWebService;
+import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+import com.webmyne.riteway_driver.model.AppConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class Launcher extends Activity {
@@ -53,7 +68,8 @@ public class Launcher extends Activity {
         GoogleCloudMessaging gcm;
         String regid;
         String PROJECT_NUMBER = "766031645889";
-
+        String driverIMEI_Number;
+        DriverProfile driverProfile;
         public PlaceholderFragment() {
         }
 
@@ -140,40 +156,15 @@ public class Launcher extends Activity {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                String SENDER_ID="APA91bHGfPgU7dKGF6cbBX8xhPePRTWdXooX2ZkFRDgVjNpcSWogjoUxYsbtrJH0MimExsdtpNMO_Clapjm1blkWxGuWwqB3WrerMBA-uh48CtXlIauvZj6hfEwefWDqApz37xELI4hrjRFW0yLBNTHCOMOP7IPqKg";
+
+                    TelephonyManager telephonyManager = (TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+                    driverIMEI_Number= telephonyManager.getDeviceId();
+//                String SENDER_ID="APA91bHGfPgU7dKGF6cbBX8xhPePRTWdXooX2ZkFRDgVjNpcSWogjoUxYsbtrJH0MimExsdtpNMO_Clapjm1blkWxGuWwqB3WrerMBA-uh48CtXlIauvZj6hfEwefWDqApz37xELI4hrjRFW0yLBNTHCOMOP7IPqKg";
                     try {
                         if (gcm == null) {
                             gcm = GoogleCloudMessaging.getInstance(getActivity());
                         }
                         regid = gcm.register(PROJECT_NUMBER);
-                        try {
-                            Bundle data = new Bundle();
-                            data.putString("my_message", "Hello World");
-                            data.putString("my_action",
-                                    "com.google.android.gcm.demo.app.ECHO_NOW");
-                            String id = Integer.toString(2);
-                            gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-//                            msg = "Sent message";
-                        } catch (IOException ex) {
-//                            msg = "Error :" + ex.getMessage();
-                        }
-
-
-                        String msg = "";
-                        try {
-                            Bundle data = new Bundle();
-                            data.putString("my_message", "Hello World");
-                            data.putString("my_action",
-                                    "com.google.android.gcm.demo.app.ECHO_NOW");
-
-                            String id = Integer.toString(1);
-                            gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-                            msg = "Sent message";
-                        } catch (IOException ex) {
-                            msg = "Error :" + ex.getMessage();
-                        }
-
-
 
 
                         Log.e("GCM ID :", regid);
@@ -202,14 +193,72 @@ public class Launcher extends Activity {
                             });
                             alert.show();
                         } else {
-                            SharedPreferences preferences = getActivity().getSharedPreferences("run_before",MODE_PRIVATE);
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putBoolean("RanBefore", true);
-                            editor.commit();
+                            JSONObject driverProfileObject = new JSONObject();
+                            try {
 
-                            Intent i = new Intent(getActivity(), DrawerActivity.class);
-                            startActivity(i);
-                            getActivity().finish();
+                                driverProfileObject.put("Active", AppConstants.driverStatusBoolValue);
+                                driverProfileObject.put("Webmyne_DeviceType", AppConstants.deviceType);
+                                driverProfileObject.put("Webmyne_DriverIMEI_Number",driverIMEI_Number+ "");
+                                driverProfileObject.put("Webmyne_NotificationID", regid+"");
+                                Log.e("driverProfileObject: ",driverProfileObject+"");
+
+
+                            }catch(JSONException e) {
+                                e.printStackTrace();
+                            }
+                            JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverProfile, driverProfileObject, new Response.Listener<JSONObject>() {
+
+                                @Override
+                                public void onResponse(JSONObject jobj) {
+                                    String response = jobj.toString();
+                                    Log.e("response continue: ", response + "");
+                                    driverProfile = new GsonBuilder().create().fromJson(response, DriverProfile.class);
+
+                                    Log.e("Active",driverProfile.Active+"");
+                                    Log.e("CompanyID",driverProfile.CompanyID+"");
+                                    Log.e("DriverID",driverProfile.DriverID+"");
+                                    Log.e("FirstName",driverProfile.FirstName+"");
+                                    Log.e("LastName",driverProfile.LastName+"");
+                                    Log.e("Response",driverProfile.Response+"");
+                                    Log.e("Webmyne_DeviceType",driverProfile.Webmyne_DeviceType+"");
+                                    Log.e("Webmyne_DriverIMEI_Number",driverProfile.Webmyne_DriverIMEI_Number+"");
+                                    Log.e("Webmyne_Latitude",driverProfile.Webmyne_Latitude+"");
+                                    Log.e("Webmyne_Longitude",driverProfile.Webmyne_Longitude+"");
+                                    Log.e("Webmyne_NotificationID",driverProfile.Webmyne_NotificationID+"");
+                                    if(driverProfile.Response.equalsIgnoreCase("Fail")) {
+                                        SharedPreferences preferences = getActivity().getSharedPreferences("run_before",MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = preferences.edit();
+                                        editor.putBoolean("RanBefore", false);
+                                        editor.commit();
+                                        AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+                                        alert.setTitle("Invalid Driver");
+                                        alert.setMessage("Driver not Found");
+                                        alert.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                                getActivity().finish();
+                                            }
+                                        });
+                                        alert.show();
+                                    } else {
+                                        validDriver();
+                                    }
+
+                                }
+                            }, new Response.ErrorListener() {
+
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.e("error response: ",error+"");
+                                }
+                            });
+                            MyApplication.getInstance().addToRequestQueue(req);
+
+
+
+
+
                         }
                     } catch (IOException ex) {
                         ex.printStackTrace();
@@ -218,6 +267,26 @@ public class Launcher extends Activity {
                 }
             }.execute();
         } // end of getRegId
+
+        public void validDriver() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    SharedPreferences preferences = getActivity().getSharedPreferences("run_before",MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("RanBefore", true);
+                    editor.commit();
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+                    complexPreferences.putObject("driver_data", driverProfile);
+                    complexPreferences.commit();
+
+                    Intent i = new Intent(getActivity(), DrawerActivity.class);
+                    startActivity(i);
+                    getActivity().finish();
+                }
+            });
+        }
     } // end of fragment
 
 

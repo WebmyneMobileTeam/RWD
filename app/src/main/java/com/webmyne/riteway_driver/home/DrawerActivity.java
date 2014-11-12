@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
+import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.model.CustomTypeface;
 import com.webmyne.riteway_driver.my_orders.MyOrdersFragment;
 import com.webmyne.riteway_driver.my_orders.OrderDetailActivity;
@@ -68,18 +70,23 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     @Override
     protected void onResume() {
         super.onResume();
-        if(OrderDetailActivity.isAcceptRequest==true){
-            OrderDetailActivity.isAcceptRequest=false;
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction ft = manager.beginTransaction();
 
-            CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
-            if (manager.findFragmentByTag(CURRENT_TRIP) == null) {
-                ft.replace(R.id.main_content, currentTripFragment,CURRENT_TRIP).commit();
-            }
-            txtHeader.setText("CURRENT TRIP");
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(DrawerActivity.this, "driver_data", 0);
+        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+        Log.e("driver notification id: ",driverProfile.Webmyne_NotificationID+"");
 
-        }
+//        if(OrderDetailActivity.isAcceptRequest==true){
+//            OrderDetailActivity.isAcceptRequest=false;
+//            FragmentManager manager = getSupportFragmentManager();
+//            FragmentTransaction ft = manager.beginTransaction();
+//
+//            CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
+//            if (manager.findFragmentByTag(CURRENT_TRIP) == null) {
+//                ft.replace(R.id.main_content, currentTripFragment,CURRENT_TRIP).commit();
+//            }
+//            txtHeader.setText("CURRENT TRIP");
+//
+//        }
     }
 
     private void initFields() {
