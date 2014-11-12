@@ -21,6 +21,7 @@ import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.xml.datatype.Duration;
@@ -71,6 +72,7 @@ public class CurrentOrdersFragment extends Fragment {
                 }
             }
             if(currentOrdersList !=null) {
+                Collections.reverse(filteredCurruntOrderList);
                 currentOrdersAdapter = new CurrentOrdersAdapter(getActivity(), filteredCurruntOrderList);
                 currentOrdersListView.setAdapter(currentOrdersAdapter);
             }
