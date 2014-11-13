@@ -446,6 +446,7 @@
                             android:textSize="@dimen/text_size_medium" />
 
                         <TextView
+                            android:id="@+id/txtCustomerRatting"
                             android:layout_weight="2"
                             android:gravity="left"
                             android:text="3.5"
@@ -483,6 +484,7 @@
                         android:orientation="horizontal">
 
                         <EditText
+                            android:id="@+id/txtCustomerComments"
                             android:layout_weight="1"
                             android:hint="Comments"
                             android:padding="4dp"

@@ -15,12 +15,14 @@ import android.widget.TextView;
 
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.customViews.ListDialog;
+import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
 
 import java.util.ArrayList;
 
 
 public class NotificationFragment extends Fragment implements ListDialog.setSelectedListner{
-    ArrayList<String> notificationList=new ArrayList<String>();
+    ArrayList<DriverNotification> notificationList;
+    private SharedPreferenceNotification sharedPreferenceNotification;
     ListView lvCustomerNotifications;
     NotificationAdapter notificationAdapter;
     TextView txtDateSelectionForNotification;
@@ -38,9 +40,7 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
 
         super.onCreate(savedInstanceState);
 
-        notificationList.add("One");
-        notificationList.add("Two");
-        notificationList.add("Three");
+
 
         dateSelectionArray.add("Current Week");
         dateSelectionArray.add("Last Week");
@@ -54,27 +54,43 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
         // Inflate the layout for this fragment
         View rootView= inflater.inflate(R.layout.fragment_notification, container, false);
         txtDateSelectionForNotification=(TextView)rootView.findViewById(R.id.txtDateSelectionForNotification);
+        lvCustomerNotifications=(ListView)rootView.findViewById(R.id.lvDriverNotifications);
         txtDateSelectionForNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDialog();
             }
         });
-        notificationAdapter=new NotificationAdapter(getActivity(),notificationList);
-        lvCustomerNotifications=(ListView)rootView.findViewById(R.id.lvDriverNotifications);
-        lvCustomerNotifications.setAdapter(notificationAdapter);
+
         return rootView;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        try {
+            sharedPreferenceNotification = new SharedPreferenceNotification();
+            notificationList = sharedPreferenceNotification.loadNotification(getActivity());
+
+            if (notificationList != null) {
+                notificationAdapter = new NotificationAdapter(getActivity(), notificationList);
+                lvCustomerNotifications.setAdapter(notificationAdapter);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public class NotificationAdapter extends BaseAdapter {
 
         Context context;
 
         LayoutInflater inflater;
 
-        ArrayList<String> notificationList;
+        ArrayList<DriverNotification> notificationList;
 
 
-        public NotificationAdapter(Context context, ArrayList<String> notificationList) {
+        public NotificationAdapter(Context context, ArrayList<DriverNotification> notificationList) {
 
             this.context = context;
             this.notificationList = notificationList;
@@ -93,7 +109,7 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
         }
 
         class ViewHolder {
-
+        TextView txtMessageTitle,txtNotificationDate,txtNotificationMessage,txtNotificationTime;
 
         }
 
@@ -105,10 +121,19 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_notification, parent, false);
                 holder = new ViewHolder();
+                holder.txtMessageTitle=(TextView)convertView.findViewById(R.id.txtMessageTitle);
+                holder.txtNotificationDate=(TextView)convertView.findViewById(R.id.txtNotificationDate);
+                holder.txtNotificationMessage=(TextView)convertView.findViewById(R.id.txtNotificationMessage);
+                holder.txtNotificationTime=(TextView)convertView.findViewById(R.id.txtNotificationTime);
+
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+            holder.txtMessageTitle.setText(notificationList.get(position).Title);
+            holder.txtNotificationDate.setText(notificationList.get(position).Date);
+            holder.txtNotificationMessage.setText(notificationList.get(position).Message);
+            holder.txtNotificationTime.setText(notificationList.get(position).notificationTime);
 
             return convertView;
 

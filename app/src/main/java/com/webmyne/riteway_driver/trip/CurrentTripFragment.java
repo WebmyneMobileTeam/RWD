@@ -1,6 +1,7 @@
 package com.webmyne.riteway_driver.trip;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -30,6 +32,7 @@ import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.ResponseMessage;
+import com.webmyne.riteway_driver.my_orders.Trip;
 import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackActivity;
 
 import org.json.JSONException;
@@ -43,6 +46,7 @@ public class CurrentTripFragment extends Fragment  {
     private MapView mv;
     private MapController mc;
     TextView txtArrivedOnSite,txtStartTrip,txtStopTrip;
+    private ProgressDialog progressDialog;
     public static CurrentTripFragment newInstance(String param1, String param2) {
         CurrentTripFragment fragment = new CurrentTripFragment();
         return fragment;
@@ -67,6 +71,8 @@ public class CurrentTripFragment extends Fragment  {
                 txtArrivedOnSite.setVisibility(View.GONE);
                 txtStartTrip.setVisibility(View.VISIBLE);
                 txtStopTrip.setVisibility(View.GONE);
+                updateDriverStatus();
+
             }
         });
         txtStartTrip=(TextView)rootView.findViewById(R.id.txtStartTrip);
@@ -100,6 +106,65 @@ public class CurrentTripFragment extends Fragment  {
         mc = new MapController(mv.getMap());
 //        mc.whenMapClick(this);
     }
+
+
+    public void updateDriverStatus(){
+
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                progressDialog=new ProgressDialog(getActivity());
+                progressDialog.setCancelable(true);
+                progressDialog.setMessage("Loading...");
+                progressDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                JSONObject driverStatusObject = new JSONObject();
+                try {
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+                    Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+                    driverStatusObject.put("CustomerID", currentTrip.CustomerID);
+                    driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
+                    driverStatusObject.put("TripID", currentTrip.TripID);
+                    Log.e("driverStatusObject: ", driverStatusObject + "");
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverArrivedNotification, driverStatusObject, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject jobj) {
+                        String response = jobj.toString();
+                        Log.e("response continue: ", response + "");
+                        ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+                        Log.e("Response: ",responseMessage.Response+"");
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("error response: ",error+"");
+                    }
+                });
+                MyApplication.getInstance().addToRequestQueue(req);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                progressDialog.dismiss();
+
+            }
+        }.execute();
+
+
+    }
+
     @Override
     public void onResume() {
         super.onResume();

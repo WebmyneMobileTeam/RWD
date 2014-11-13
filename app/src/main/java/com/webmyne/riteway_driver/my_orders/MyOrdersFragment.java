@@ -24,7 +24,9 @@ import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.PagerSlidingTabStrip;
+import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
+import com.webmyne.riteway_driver.notifications.DriverNotification;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -33,11 +35,13 @@ import java.util.List;
 
 public class MyOrdersFragment extends Fragment {
     private SharedPreferenceTrips sharedPreferenceTrips;
+    private SharedPreferenceNotification sharedPreferenceNotification;
     private PagerSlidingTabStrip tabs;
     private ViewPager pager;
     private MyPagerAdapter adapter;
     ProgressDialog progressDialog;
-    public ArrayList<Trip> tripArrayList=new ArrayList<Trip>();
+     ArrayList<Trip> tripArrayList;
+     ArrayList<DriverNotification> notificationList;
 
     public static MyOrdersFragment newInstance(String param1, String param2) {
         MyOrdersFragment fragment = new MyOrdersFragment();
@@ -51,8 +55,6 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
 
     }
 
@@ -69,6 +71,7 @@ public class MyOrdersFragment extends Fragment {
         super.onResume();
         getTripList();
         sharedPreferenceTrips=new SharedPreferenceTrips();
+        sharedPreferenceNotification=new SharedPreferenceNotification();
     }
 
     public void getTripList() {
@@ -77,60 +80,19 @@ public class MyOrdersFragment extends Fragment {
         final DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
 
         Log.e("list: ", AppConstants.DriverTrips+"9");
+        progressDialog=new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
-        new AsyncTask<Void,Void,Void>() {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(true);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
-            }
+        new CallWebService(AppConstants.DriverTrips+driverProfile.DriverID , CallWebService.TYPE_JSONARRAY) {
 
             @Override
-            protected Void doInBackground(Void... params) {
+            public void response(String response) {
 
-                new CallWebService(AppConstants.DriverTrips+driverProfile.DriverID , CallWebService.TYPE_JSONARRAY) {
-
-                    @Override
-                    public void response(String response) {
-
-                        Type listType=new TypeToken<List<Trip>>(){
-                        }.getType();
-                        tripArrayList = new GsonBuilder().create().fromJson(response, listType);
-
-
-                        handleTripListData();
-                    }
-
-                    @Override
-                    public void error(VolleyError error) {
-
-                        Log.e("error: ",error+"");
-
-                    }
-                }.start();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                progressDialog.dismiss();
-            }
-
-
-        }.execute();
-
-
-    }
-
-    public void handleTripListData() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
+                Type listType=new TypeToken<List<Trip>>(){
+                }.getType();
+                tripArrayList = new GsonBuilder().create().fromJson(response, listType);
 
                 sharedPreferenceTrips.clearTrip(getActivity());
                 for(int i=0;i<tripArrayList.size();i++){
@@ -142,8 +104,54 @@ public class MyOrdersFragment extends Fragment {
                 final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
                 pager.setPageMargin(pageMargin);
                 tabs.setViewPager(pager);
+
+                getNotificationList();
             }
-        });
+
+            @Override
+            public void error(VolleyError error) {
+
+                Log.e("error: ",error+"");
+
+            }
+        }.start();
+
+
+
+
+
+    }
+
+    public void getNotificationList() {
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+        final DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+
+        new CallWebService(AppConstants.GetDriverNotifications+driverProfile.DriverID , CallWebService.TYPE_JSONARRAY) {
+
+            @Override
+            public void response(String response) {
+
+                Type listType=new TypeToken<List<DriverNotification>>(){
+                }.getType();
+
+                notificationList = new GsonBuilder().create().fromJson(response, listType);
+//                Log.e("notification list size:",notificationList.size()+"");
+                sharedPreferenceNotification.clearNotification(getActivity());
+                for(int i=0;i<notificationList.size();i++){
+                    sharedPreferenceNotification.saveNotification(getActivity(),notificationList.get(i));
+                    Log.e("notification id: ",notificationList.get(i).notificationStatus+"");
+                }
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void error(VolleyError error) {
+
+                Log.e("error: ",error+"");
+
+            }
+        }.start();
+
 
     }
 
