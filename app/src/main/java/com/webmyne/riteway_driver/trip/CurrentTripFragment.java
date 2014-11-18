@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,6 +46,8 @@ import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackActivit
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -119,22 +123,28 @@ public class CurrentTripFragment extends Fragment  {
 //                    txtArrivedOnSite.setText("STOP TRIP");
                     txtArrivedOnSite.setVisibility(View.INVISIBLE);
                 } else if(txtArrivedOnSite.getText().equals("STOP TRIP")) {
-                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
-                    SharedPreferences.Editor editor=preferencesTimeInterval.edit();
-                    //TODO
-                                        editor.putString("fare","");
-                    editor.putString("dropoff_address","");
-                    editor.putString("dropoff_latitude","");
-                    editor.putString("dropoff_longitude","");
-                    editor.commit();
-//                    Intent i=new Intent(getActivity(), ReceiptAndFeedbackActivity.class);
-//                    startActivity(i);
+                    try {
+//                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
+//                    SharedPreferences.Editor editor=preferencesTimeInterval.edit();
+//                    //TODO
+//                                        editor.putString("fare","");
+//                    editor.putString("dropoff_address","");
+//                    editor.putString("dropoff_latitude","");
+//                    editor.putString("dropoff_longitude","");
+//                    editor.commit();
+
+                      String address=  getAddressValue(currentLocation);
+
+//                        Intent i = new Intent(getActivity(), ReceiptAndFeedbackActivity.class);
+//                        startActivity(i);
                     Log.e("fare: ",pickupLocation.distanceTo(currentLocation)+"");
                     Log.e("dropoff_latitude: ",currentLocation.getLatitude()+"");
                     Log.e("dropoff_longitude: ",currentLocation.getLongitude()+"");
-                    Log.e("dropoff_address: ",currentLocation.getLongitude()+"");
+                    Log.e("dropoff_address: ",address+"");
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
-
 
 
 
@@ -144,6 +154,50 @@ public class CurrentTripFragment extends Fragment  {
         mv = (MapView)rootView.findViewById(R.id.map);
         setView(savedInstanceState);
         return rootView;
+    }
+
+    public String getAddressValue(Location currentLocation) {
+        StringBuilder result = new StringBuilder();
+        try {
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(getActivity(), Locale.getDefault());
+            addresses = geocoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
+
+            Address address = addresses.get(0);
+            String locality = address.getLocality();
+            String city = address.getCountryName();
+            String region_code = address.getCountryCode();
+            String zipcode = address.getPostalCode();
+            String street = address.getAddressLine(0);
+            String street2 = address.getAddressLine(1);
+
+
+            if (street != null) {
+                result.append(street + " ");
+            }
+
+            if (street2 != null) {
+                result.append(street2 + " ");
+            }
+
+            if (locality != null) {
+                result.append(locality + " ");
+            }
+
+
+            if (city != null) {
+                result.append(city + " " + region_code + " ");
+            }
+
+            if (zipcode != null) {
+                result.append(zipcode);
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result.toString();
     }
 
     private void setView(Bundle savedInstanceState) {

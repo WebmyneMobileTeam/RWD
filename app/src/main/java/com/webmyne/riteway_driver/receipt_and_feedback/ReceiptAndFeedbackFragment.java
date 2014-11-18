@@ -88,11 +88,11 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences preferences = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
-        preferences.getString("fare", "");
-        preferences.getString("dropoff_address", "");
-        preferences.getString("dropoff_latitude", "");
-        preferences.getString("dropoff_longitude", "");
+//        SharedPreferences preferences = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
+//        preferences.getString("fare", "");
+//        preferences.getString("dropoff_address", "");
+//        preferences.getString("dropoff_latitude", "");
+//        preferences.getString("dropoff_longitude", "");
     }
 
     public void completTrip(){
