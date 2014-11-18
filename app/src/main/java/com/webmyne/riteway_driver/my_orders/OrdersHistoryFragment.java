@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.customViews.ListDialog;
+import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
 
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     OrdersHistoryAdapter ordersHistoryAdapter;
     TextView txtDateSelection;
     ArrayList<Trip> ordersHistoryList;
+    ArrayList<Trip> filteredOrderList;
     ArrayList<String> dateSelectionArray=new ArrayList<String>();
     public static OrdersHistoryFragment newInstance(String param1, String param2) {
         OrdersHistoryFragment fragment = new OrdersHistoryFragment();
@@ -44,8 +46,6 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         dateSelectionArray.add("Current Week");
         dateSelectionArray.add("Last Week");
         dateSelectionArray.add("Current Month");
@@ -73,20 +73,14 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     public void onResume() {
         super.onResume();
         try {
-            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-            String date=format.format(new Date());
-            Date dateValue=format.parse(date);
+
             sharedPreferenceTrips=new SharedPreferenceTrips();
             ordersHistoryList=sharedPreferenceTrips.loadTrip(getActivity());
-            ArrayList<Trip> filteredCurruntOrderList=new ArrayList<Trip>();
-            for(int i=0;i<ordersHistoryList.size();i++){
-                if(ordersHistoryList.get(i).TripStatus.contains("Success") ){
-                    filteredCurruntOrderList.add(ordersHistoryList.get(i));
-                }
-            }
-            if(ordersHistoryList != null) {
-                Collections.reverse(filteredCurruntOrderList);
-                ordersHistoryAdapter = new OrdersHistoryAdapter(getActivity(), filteredCurruntOrderList);
+            filteredOrderList=new ArrayList<Trip>();
+            filterData("Current Week");
+            if(filteredOrderList != null) {
+                Collections.reverse(filteredOrderList);
+                ordersHistoryAdapter = new OrdersHistoryAdapter(getActivity(), filteredOrderList);
                 ordersHistoryListView.setAdapter(ordersHistoryAdapter);
             }
         }catch (Exception e) {
@@ -168,6 +162,88 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
 
     }
 
+    private void filterData(String filterType){
+        try {
+
+            filteredOrderList.clear();
+
+            SimpleDateFormat dayFormat = new SimpleDateFormat("dd");
+            SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
+            SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy");
+
+            int day = Integer.parseInt(dayFormat.format(new Date()));
+            int month = Integer.parseInt(monthFormat.format(new Date()))-1;
+            int year = Integer.parseInt(yearFormat.format(new Date()));
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(calendar.YEAR,year);
+            calendar.set(calendar.MONTH,month);
+            calendar.set(calendar.DAY_OF_MONTH,day);
+
+            int currentWeekOfyear=calendar.get(calendar.WEEK_OF_YEAR);
+            int lastWeekOfYear=currentWeekOfyear-1;
+            if(lastWeekOfYear<1){
+                Calendar c = Calendar.getInstance();
+                c.set(c.YEAR,calendar.YEAR-1);
+                c.set(c.MONTH,11);
+                c.set(c.DAY_OF_MONTH,31);
+                lastWeekOfYear=c.get(c.WEEK_OF_YEAR);
+            }
+            int currentMonth=calendar.get(calendar.MONTH);
+            int lastMonth=currentMonth-1;
+            if(lastMonth<0){
+                Calendar c = Calendar.getInstance();
+                c.set(c.YEAR,calendar.YEAR-1);
+                c.set(c.MONTH,11);
+                c.set(c.DAY_OF_MONTH,31);
+                lastMonth=c.get(c.MONTH);
+            }
+
+            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+            String date=format.format(new Date());
+
+            for (int i = 0; i < filteredOrderList.size(); i++) {
+                Date loopDate = format.parse(getFormatedDate(filteredOrderList.get(i)));
+                int loopDay = Integer.parseInt(dayFormat.format(loopDate));
+                int loopMonth = Integer.parseInt(monthFormat.format(loopDate))-1;
+                int loopYear = Integer.parseInt(yearFormat.format(loopDate));
+
+                Calendar loopCalendar = Calendar.getInstance();
+                loopCalendar.set(loopCalendar.YEAR,loopYear);
+                loopCalendar.set(loopCalendar.MONTH,loopMonth);
+                loopCalendar.set(loopCalendar.DAY_OF_MONTH,loopDay);
+
+                int loopCurrentWeekOfyear=loopCalendar.get(loopCalendar.WEEK_OF_YEAR);
+                int loopCurrentMonth=loopCalendar.get(loopCalendar.MONTH);
+
+                if( filteredOrderList.get(i).TripStatus.contains(AppConstants.tripSuccessStatus)) {
+                    if (filterType.equalsIgnoreCase("Current Week")) {
+                        if (currentWeekOfyear == loopCurrentWeekOfyear && (!date.equals(getFormatedDate(filteredOrderList.get(i))))) {
+                            filteredOrderList.add(filteredOrderList.get(i));
+                        }
+                    } else if (filterType.equalsIgnoreCase("Last Week")) {
+                        if (lastWeekOfYear == loopCurrentWeekOfyear) {
+                            filteredOrderList.add(filteredOrderList.get(i));
+                        }
+                    } else if (filterType.equalsIgnoreCase("Current Month")) {
+                        if (currentMonth == loopCurrentMonth) {
+                            filteredOrderList.add(filteredOrderList.get(i));
+                        }
+                    } else if (filterType.equalsIgnoreCase("Last Month")) {
+                        if (lastMonth == loopCurrentMonth) {
+                            filteredOrderList.add(filteredOrderList.get(i));
+                        }
+                    }
+                }
+            }
+            if(ordersHistoryAdapter != null) {
+                ordersHistoryAdapter.notifyDataSetChanged();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public void showDialog() {
 
         ListDialog listDialog = new ListDialog(getActivity(), android.R.style.Theme_Translucent_NoTitleBar);
@@ -183,7 +259,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     public void selected(String value) {
 
         txtDateSelection.setText("Filtered By "+value);
-
+        filterData(value);
     }
 
     public String getFormatedDate(Trip currentTrip) {

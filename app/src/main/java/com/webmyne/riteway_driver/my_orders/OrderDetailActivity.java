@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,6 +90,7 @@ public class OrderDetailActivity extends BaseActivity {
         TextView currentTripDriverName, currentTripPickup, currentTripDropoff, currentTripPickupNote, currentTripDate, currentTripTime,
                 currentTripDistance, txtTripStatus, currentTripPaymentType, currentTripFare, currentTripTip, currentTripFee,txtTotalAmount,
                 txtCancelTrip,txtAcceptTrip,currentTripMobile,currentTripEmail;
+        LinearLayout bottomButtonSelection;
         public PlaceholderFragment() {
         }
 
@@ -119,6 +121,7 @@ public class OrderDetailActivity extends BaseActivity {
                     tripResponse("Accept");
                 }
             });
+            bottomButtonSelection=(LinearLayout)rootView.findViewById(R.id.bottomButtonSelection);
             currentTripMobile=(TextView)rootView.findViewById(R.id.currentTripMobile);
             currentTripEmail=(TextView)rootView.findViewById(R.id.currentTripEmail);
             currentTripDriverName=(TextView)rootView.findViewById(R.id.currentTripCustomerName);
@@ -159,6 +162,11 @@ public class OrderDetailActivity extends BaseActivity {
             currentTripFee.setText("$ "+currentTrip.TripFee);
             txtTotalAmount.setText(String.format("$ %.2f", getTotal())+"");
             txtTripStatus.setText(currentTrip.TripStatus);
+            if(currentTrip.TripStatus.contains(AppConstants.tripAcceptStatus) || currentTrip.TripStatus.contains(AppConstants.tripCancelledByDriverStatus) || currentTrip.TripStatus.contains(AppConstants.tripCancelledByCustomerStatus)){
+                bottomButtonSelection.setVisibility(View.GONE);
+            } else {
+                bottomButtonSelection.setVisibility(View.VISIBLE);
+            }
         }
 
         public String getFormatedDate() {
@@ -193,6 +201,7 @@ public class OrderDetailActivity extends BaseActivity {
 
         public void tripResponse(final String status) {
             new AsyncTask<Void,Void,Void>(){
+
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();

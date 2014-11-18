@@ -2,6 +2,7 @@ package com.webmyne.riteway_driver.receipt_and_feedback;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -87,7 +88,11 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
     @Override
     public void onResume() {
         super.onResume();
-
+        SharedPreferences preferences = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
+        preferences.getString("fare", "");
+        preferences.getString("dropoff_address", "");
+        preferences.getString("dropoff_latitude", "");
+        preferences.getString("dropoff_longitude", "");
     }
 
     public void completTrip(){

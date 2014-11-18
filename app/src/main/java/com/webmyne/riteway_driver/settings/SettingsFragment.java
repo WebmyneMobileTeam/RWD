@@ -58,12 +58,12 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         timeList=new ArrayList<String>();
+        timeList.add("1");
+        timeList.add("2");
         timeList.add("3");
         timeList.add("5");
         timeList.add("7");
         timeList.add("10");
-        timeList.add("15");
-        timeList.add("20");
     }
 
     @Override

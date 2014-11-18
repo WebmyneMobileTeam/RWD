@@ -21,6 +21,7 @@ public class ReceiptAndFeedbackActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt_and_feedback);
+
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
         getActionBar().setDisplayHomeAsUpEnabled(true);

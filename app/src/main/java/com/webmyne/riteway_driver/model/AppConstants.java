@@ -17,4 +17,12 @@ public class AppConstants {
     public static  boolean driverStatusBoolValue=true;
     public static final String deviceType="Android";
 
+    // Trip Status
+    public static final String tripInProgressStatus="In Progress";
+    public static final String tripOnTripStatus="On Trip";
+    public static final String tripCancelledByDriverStatus="Cancelled By Driver";
+    public static final String tripCancelledByCustomerStatus="Canceled By Customer";
+    public static final String tripAcceptStatus="Accept";
+    public static final String tripSuccessStatus="Success";
+
 }

@@ -7,16 +7,23 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
+import com.webmyne.riteway_driver.trip.CurrentTripFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,12 +72,12 @@ public class CurrentOrdersFragment extends Fragment {
         try {
             SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
             String date=format.format(new Date());
-            Date dateValue=format.parse(date);
+
             sharedPreferenceTrips = new SharedPreferenceTrips();
             currentOrdersList = sharedPreferenceTrips.loadTrip(getActivity());
             ArrayList<Trip> filteredCurruntOrderList=new ArrayList<Trip>();
             for(int i=0;i<currentOrdersList.size();i++){
-                if((!currentOrdersList.get(i).TripStatus.contains("Cancel") )){
+                if((!(currentOrdersList.get(i).TripStatus.contains(AppConstants.tripCancelledByDriverStatus) || currentOrdersList.get(i).TripStatus.contains(AppConstants.tripCancelledByCustomerStatus)) && date.equals(getFormatedDate(currentOrdersList.get(i))) )){
                     filteredCurruntOrderList.add(currentOrdersList.get(i));
                 }
             }
@@ -85,7 +92,6 @@ public class CurrentOrdersFragment extends Fragment {
     }
 
     public class CurrentOrdersAdapter extends BaseAdapter {
-
         Context context;
         ArrayList<Trip> currentOrdersList;
 
@@ -109,6 +115,7 @@ public class CurrentOrdersFragment extends Fragment {
         class ViewHolder {
             TextView currentOrderCname,currentOrderDate,currentOrderPickupLocation,currentOrderDropoffLocation,currentOrderFareAmount,
                     orderHistoryStatus;
+            ImageView mapView;
         }
 
         public View getView(final int position, View convertView,
@@ -126,6 +133,8 @@ public class CurrentOrdersFragment extends Fragment {
                 holder.currentOrderDropoffLocation=(TextView)convertView.findViewById(R.id.currentOrderDropoffLocation);
                 holder.currentOrderFareAmount=(TextView)convertView.findViewById(R.id.currentOrderFareAmount);
                 holder. orderHistoryStatus=(TextView)convertView.findViewById(R.id.orderHistoryStatus);
+                holder. mapView=(ImageView)convertView.findViewById(R.id.mapView);
+
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -136,7 +145,20 @@ public class CurrentOrdersFragment extends Fragment {
             holder.currentOrderDropoffLocation.setText("dropoff: "+currentOrdersList.get(position).DropOffAddress);
             holder.currentOrderFareAmount.setText(String.format("$ %.2f", getTotal(currentOrdersList.get(position)))+"");
             holder.orderHistoryStatus.setText("status: "+currentOrdersList.get(position).TripStatus);
-
+            holder. mapView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+                    complexPreferences.putObject("current_trip_details", currentOrdersList.get(position));
+                    complexPreferences.commit();
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction ft = manager.beginTransaction();
+                    CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
+                    if (manager.findFragmentByTag("CURRENT_TRIP") == null) {
+                        ft.replace(R.id.main_content, currentTripFragment,"CURRENT_TRIP").commit();
+                    }
+                }
+            });
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
