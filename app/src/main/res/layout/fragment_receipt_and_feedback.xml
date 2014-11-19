@@ -113,7 +113,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripCustomerName" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -149,7 +150,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripPickupAddress" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -185,7 +187,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripDropoffAddress" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -221,7 +224,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripDistance" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -257,7 +261,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripDate" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -293,7 +298,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripFare" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -329,7 +335,8 @@
 
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/black"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:id="@+id/txtTripTip" />
                     </LinearLayout>
 
 
@@ -371,7 +378,8 @@
 
                                 android:layout_height="wrap_content"
                                 android:textColor="@android:color/black"
-                                android:textSize="@dimen/text_size_medium"/>
+                                android:textSize="@dimen/text_size_medium"
+                                android:id="@+id/txtTripFee" />
 
 
                             <TextView
@@ -473,7 +481,8 @@
                         android:layout_gravity="center"
                         android:rating="3.5"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:id="@+id/rattings" />
                     </LinearLayout>
                     <LinearLayout
                         android:paddingLeft="16dp"

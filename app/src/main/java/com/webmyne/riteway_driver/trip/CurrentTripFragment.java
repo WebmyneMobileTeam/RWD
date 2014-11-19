@@ -9,7 +9,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 
 import android.os.CountDownTimer;
@@ -92,9 +92,9 @@ public class CurrentTripFragment extends Fragment  {
 
                 if(txtArrivedOnSite.getText().equals("ARRIVED ON SITE")){
                     AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-                    alert.setTitle("Title");
-                    alert.setMessage("Message");
-                    alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    alert.setTitle("Alert Arived On Site");
+                    alert.setMessage("Send notification to cutomer about you reached at pickup location");
+                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -102,15 +102,6 @@ public class CurrentTripFragment extends Fragment  {
                             updateArrivedOnSiteStatus();
                             dialog.dismiss();
 
-                        }
-                    });
-
-                    alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            dialog.dismiss();
                         }
                     });
 
@@ -124,23 +115,21 @@ public class CurrentTripFragment extends Fragment  {
                     txtArrivedOnSite.setVisibility(View.INVISIBLE);
                 } else if(txtArrivedOnSite.getText().equals("STOP TRIP")) {
                     try {
-//                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
-//                    SharedPreferences.Editor editor=preferencesTimeInterval.edit();
-//                    //TODO
-//                                        editor.putString("fare","");
-//                    editor.putString("dropoff_address","");
-//                    editor.putString("dropoff_latitude","");
-//                    editor.putString("dropoff_longitude","");
-//                    editor.commit();
+                        String address=  getAddressValue(currentLocation);
 
-                      String address=  getAddressValue(currentLocation);
+                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
+                    SharedPreferences.Editor editor=preferencesTimeInterval.edit();
+                        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+                        Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+                    editor.putString("fare",String.format("%.2f", (pickupLocation.distanceTo(currentLocation)/1000)*0.6214*Double.parseDouble(currentTrip.TripFare))+"");
+                    editor.putString("dropoff_address",address+"");
+                    editor.putString("dropoff_latitude",currentLocation.getLatitude()+"");
+                    editor.putString("dropoff_longitude",currentLocation.getLongitude()+"");
+                    editor.putString("distance",(String.format("%.2f",pickupLocation.distanceTo(currentLocation)/1000)) +"");
+                    editor.commit();
 
-//                        Intent i = new Intent(getActivity(), ReceiptAndFeedbackActivity.class);
-//                        startActivity(i);
-                    Log.e("fare: ",pickupLocation.distanceTo(currentLocation)+"");
-                    Log.e("dropoff_latitude: ",currentLocation.getLatitude()+"");
-                    Log.e("dropoff_longitude: ",currentLocation.getLongitude()+"");
-                    Log.e("dropoff_address: ",address+"");
+                    updateStopTripStatus(AppConstants.tripStopStatus);
+
                     } catch (Exception e){
                         e.printStackTrace();
                     }
@@ -207,124 +196,148 @@ public class CurrentTripFragment extends Fragment  {
     }
 
     public void updateArrivedOnSiteStatus(){
+        progressDialog=new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
-        new AsyncTask<Void,Void,Void>(){
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(true);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
-            }
-
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                JSONObject driverStatusObject = new JSONObject();
-                try {
-                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-                    Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
-                    driverStatusObject.put("CustomerID", currentTrip.CustomerID);
-                    driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
-                    driverStatusObject.put("TripID", currentTrip.TripID);
-                    Log.e("driverStatusObject: ", driverStatusObject + "");
-                }catch(JSONException e) {
-                    e.printStackTrace();
-                }
-                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverArrivedNotification, driverStatusObject, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject jobj) {
-                        String response = jobj.toString();
-                        Log.e("response continue: ", response + "");
-                        ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                        Log.e("Response: ",responseMessage.Response+"");
-
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("error response: ",error+"");
-                    }
-                });
-                MyApplication.getInstance().addToRequestQueue(req);
-                return null;
-            }
+        JSONObject driverStatusObject = new JSONObject();
+        try {
+            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+            Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+            driverStatusObject.put("CustomerID", currentTrip.CustomerID);
+            driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
+            driverStatusObject.put("TripID", currentTrip.TripID);
+            driverStatusObject.put("TripStatus", AppConstants.tripArrivedOnSiteStatus);
+            Log.e("driverStatusObject: ", driverStatusObject + "");
+        }catch(JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverArrivedNotification, driverStatusObject, new Response.Listener<JSONObject>() {
 
             @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+            public void onResponse(JSONObject jobj) {
+                String response = jobj.toString();
+                Log.e("response continue: ", response + "");
+                ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+                Log.e("Response: ",responseMessage.Response+"");
                 progressDialog.dismiss();
-                txtArrivedOnSite.setText("START TRIP");
+                if(responseMessage.Response.equalsIgnoreCase("Success")){
+                    txtArrivedOnSite.setText("START TRIP");
+                } else {
+                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                }
 
             }
-        }.execute();
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error response: ",error+"");
+            }
+        });
+        MyApplication.getInstance().addToRequestQueue(req);
 
 
     }
 
 
     public void updateStartTripStatus(final String status) {
-        new AsyncTask<Void,Void,Void>(){
+        progressDialog=new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+
+        JSONObject tripObject = new JSONObject();
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+        Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+        try {
+            tripObject.put("CustomerID",currentTrip.CustomerID+"");
+            tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
+            tripObject.put("TripID", currentTrip.TripID+"");
+            tripObject.put("TripStatus", status);
+            Log.e("tripObject: ", tripObject + "");
+
+
+        }catch(JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(true);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
-            }
+            public void onResponse(JSONObject jobj) {
+                String response = jobj.toString();
 
-            @Override
-            protected Void doInBackground(Void... params) {
-                JSONObject tripObject = new JSONObject();
-                ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-                Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
-                try {
-                    tripObject.put("CustomerID",currentTrip.CustomerID+"");
-                    tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
-                    tripObject.put("TripID", currentTrip.TripID+"");
-                    tripObject.put("TripStatus", status);
-                    Log.e("tripObject: ", tripObject + "");
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+                Log.e("after start trip response: ", responseMessage.Response +"");
 
-
-                }catch(JSONException e) {
-                    e.printStackTrace();
-                }
-                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject jobj) {
-                        String response = jobj.toString();
-
-                        ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                        Log.e("after start trip response: ", responseMessage.Response +"");
-
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("error response: ",error+"");
-                    }
-                });
-                MyApplication.getInstance().addToRequestQueue(req);
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
                 progressDialog.dismiss();
-                Toast.makeText(getActivity(), "Trip Started Successfully", Toast.LENGTH_SHORT).show();
-
+                if(responseMessage.Response.equalsIgnoreCase("Success")) {
+                    Toast.makeText(getActivity(), "Trip Started Successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                }
 
             }
-        }.execute();
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error response: ",error+"");
+            }
+        });
+        MyApplication.getInstance().addToRequestQueue(req);
+
+    }
+
+
+    public void updateStopTripStatus(final String status) {
+        progressDialog=new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+
+        JSONObject tripObject = new JSONObject();
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+        Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+        try {
+            tripObject.put("CustomerID",currentTrip.CustomerID+"");
+            tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
+            tripObject.put("TripID", currentTrip.TripID+"");
+            tripObject.put("TripStatus", status);
+            Log.e("tripObject: ", tripObject + "");
+
+
+        }catch(JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject jobj) {
+                String response = jobj.toString();
+
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+                Log.e("after stop trip response: ", responseMessage.Response +"");
+
+                progressDialog.dismiss();
+                if(responseMessage.Response.equalsIgnoreCase("Success")) {
+//                    Toast.makeText(getActivity(), "Trip Stop Successfully", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(getActivity(), ReceiptAndFeedbackActivity.class);
+                    startActivity(i);
+                } else {
+                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error response: ",error+"");
+            }
+        });
+        MyApplication.getInstance().addToRequestQueue(req);
 
     }
 
@@ -507,6 +520,7 @@ public class CurrentTripFragment extends Fragment  {
                 Log.e("response after update driver location: ", response + "");
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
                 Log.e("Response: ",responseMessage.Response+"");
+
 
             }
         }, new Response.ErrorListener() {

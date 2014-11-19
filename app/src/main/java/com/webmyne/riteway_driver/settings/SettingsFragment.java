@@ -100,63 +100,53 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     }
 
     public void updateDriverStatus(){
+        progressDialog=new ProgressDialog(getActivity());
+        progressDialog.setCancelable(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
 
-        new AsyncTask<Void,Void,Void>(){
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(true);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
-            }
+        JSONObject driverStatusObject = new JSONObject();
+        try {
+            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+            DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+            driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
+            driverStatusObject.put("DriverID", driverProfile.DriverID);
 
-            @Override
-            protected Void doInBackground(Void... params) {
-                JSONObject driverStatusObject = new JSONObject();
-                try {
-                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
-                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-                    driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
-                    driverStatusObject.put("DriverID", driverProfile.DriverID);
-
-                    Log.e("driverStatusObject: ", driverStatusObject + "");
+            Log.e("driverStatusObject: ", driverStatusObject + "");
 
 
-                }catch(JSONException e) {
-                    e.printStackTrace();
-                }
-                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverStatus, driverStatusObject, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject jobj) {
-                        String response = jobj.toString();
-                        Log.e("response continue: ", response + "");
-                      ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                        Log.e("Response: ",responseMessage.Response+"");
-                        SharedPreferences preferences = getActivity().getSharedPreferences("driver_status",getActivity().MODE_PRIVATE);
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean("driver_status", AppConstants.driverStatusBoolValue);
-                        editor.commit();
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("error response: ",error+"");
-                    }
-                });
-                MyApplication.getInstance().addToRequestQueue(req);
-                return null;
-            }
+        }catch(JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverStatus, driverStatusObject, new Response.Listener<JSONObject>() {
 
             @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+            public void onResponse(JSONObject jobj) {
+                String response = jobj.toString();
+                Log.e("response continue: ", response + "");
+                ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+                Log.e("Response: ",responseMessage.Response+"");
                 progressDialog.dismiss();
-                Toast.makeText(getActivity(), "Driver Status is updated", Toast.LENGTH_SHORT).show();
+                if(responseMessage.Response.equalsIgnoreCase("Success")) {
+                    SharedPreferences preferences = getActivity().getSharedPreferences("driver_status", getActivity().MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("driver_status", AppConstants.driverStatusBoolValue);
+                    editor.commit();
+                    Toast.makeText(getActivity(), "Driver Status is updated", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                }
             }
-        }.execute();
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("error response: ",error+"");
+            }
+        });
+        MyApplication.getInstance().addToRequestQueue(req);
+
+
 
 
     }

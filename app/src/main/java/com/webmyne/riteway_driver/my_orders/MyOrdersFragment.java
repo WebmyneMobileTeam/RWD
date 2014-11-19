@@ -1,11 +1,10 @@
 package com.webmyne.riteway_driver.my_orders;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -20,7 +19,6 @@ import com.google.gson.reflect.TypeToken;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.customViews.CallWebService;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
-import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.PagerSlidingTabStrip;
@@ -73,6 +71,7 @@ public class MyOrdersFragment extends Fragment {
         sharedPreferenceTrips=new SharedPreferenceTrips();
         sharedPreferenceNotification=new SharedPreferenceNotification();
     }
+
 
     public void getTripList() {
 

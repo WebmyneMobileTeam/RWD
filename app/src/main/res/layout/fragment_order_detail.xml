@@ -455,7 +455,7 @@
 
                         <TextView
                             android:layout_weight="1"
-
+                            android:id="@+id/txtpaymentType"
                             android:text="Payment"
                             android:layout_toLeftOf="@+id/txtTripDateAndTime"
                             android:layout_alignParentLeft="true"

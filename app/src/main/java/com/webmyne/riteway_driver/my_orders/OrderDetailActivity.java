@@ -89,7 +89,7 @@ public class OrderDetailActivity extends BaseActivity {
         Trip currentTrip;
         TextView currentTripDriverName, currentTripPickup, currentTripDropoff, currentTripPickupNote, currentTripDate, currentTripTime,
                 currentTripDistance, txtTripStatus, currentTripPaymentType, currentTripFare, currentTripTip, currentTripFee,txtTotalAmount,
-                txtCancelTrip,txtAcceptTrip,currentTripMobile,currentTripEmail;
+                txtCancelTrip,txtAcceptTrip,currentTripMobile,currentTripEmail,txtpaymentType;
         LinearLayout bottomButtonSelection;
         public PlaceholderFragment() {
         }
@@ -132,12 +132,13 @@ public class OrderDetailActivity extends BaseActivity {
             currentTripTime=(TextView)rootView.findViewById(R.id.currentTripTime);
             currentTripDistance=(TextView)rootView.findViewById(R.id.currentTripDistance);
             txtTripStatus=(TextView)rootView.findViewById(R.id.txtTripStatus);
-            currentTripPaymentType=(TextView)rootView.findViewById(R.id.currentTripPaymentType);
             currentTripFare=(TextView)rootView.findViewById(R.id.currentTripFare);
             currentTripTip=(TextView)rootView.findViewById(R.id.currentTripTip);
             currentTripFee=(TextView)rootView.findViewById(R.id.currentTripFee);
             txtTotalAmount=(TextView)rootView.findViewById(R.id.txtTotalAmount);
 
+            currentTripPaymentType=(TextView)rootView.findViewById(R.id.currentTripPaymentType);
+            txtpaymentType=(TextView)rootView.findViewById(R.id.txtpaymentType);
 
             return rootView;
         }
@@ -156,11 +157,20 @@ public class OrderDetailActivity extends BaseActivity {
             currentTripDate.setText(getFormatedDate());
             currentTripTime.setText(currentTrip.PickupTime);
             currentTripDistance.setText(currentTrip.TripDistance+" kms");
-            currentTripPaymentType.setText(currentTrip.PaymentType);
-            currentTripFare.setText("$ "+currentTrip.TripFare);
+
+            if(currentTrip.PaymentType !=null){
+                currentTripPaymentType.setVisibility(View.VISIBLE);
+                txtpaymentType.setVisibility(View.VISIBLE);
+                currentTripPaymentType.setText(currentTrip.PaymentType);
+            } else {
+                currentTripPaymentType.setVisibility(View.GONE);
+                txtpaymentType.setVisibility(View.GONE);
+            }
+
+            currentTripFare.setText("$ "+String.format("%.2f", Double.parseDouble(currentTrip.TripDistance)*0.6214*Double.parseDouble(currentTrip.TripFare)));
             currentTripTip.setText(currentTrip.TipPercentage+" %");
             currentTripFee.setText("$ "+currentTrip.TripFee);
-            txtTotalAmount.setText(String.format("$ %.2f", getTotal())+"");
+            txtTotalAmount.setText(String.format("$ %.2f", getTotal(currentTrip))+"");
             txtTripStatus.setText(currentTrip.TripStatus);
             if(currentTrip.TripStatus.contains(AppConstants.tripAcceptStatus) || currentTrip.TripStatus.contains(AppConstants.tripCancelledByDriverStatus) || currentTrip.TripStatus.contains(AppConstants.tripCancelledByCustomerStatus)){
                 bottomButtonSelection.setVisibility(View.GONE);
@@ -187,75 +197,66 @@ public class OrderDetailActivity extends BaseActivity {
             return date.getTime();
         }
 
-        public double getTotal() {
+        public double getTotal(Trip currentTrip) {
             Double total;
+            String tripFareValue=String.format("%.2f", Double.parseDouble(currentTrip.TripDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));
             if(Integer.parseInt(currentTrip.TipPercentage)>0){
-                Double tip=((Double.parseDouble(currentTrip.TripFare)*Double.parseDouble(currentTrip.TipPercentage))/100);
-                total= Double.parseDouble(currentTrip.TripFare)+tip;
+
+                Double tip=((Double.parseDouble(tripFareValue)*Double.parseDouble(currentTrip.TipPercentage))/100);
+                total= Double.parseDouble(tripFareValue)+tip;
             } else {
-                total=Double.parseDouble(currentTrip.TripFare);
+                total=Double.parseDouble(tripFareValue);
             }
             total=total+Double.parseDouble(currentTrip.TripFee);
             return total;
         }
 
         public void tripResponse(final String status) {
-            new AsyncTask<Void,Void,Void>(){
+            progressDialog=new ProgressDialog(getActivity());
+            progressDialog.setCancelable(true);
+            progressDialog.setMessage("Loading...");
+            progressDialog.show();
+
+            JSONObject tripObject = new JSONObject();
+            try {
+                tripObject.put("CustomerID",currentTrip.CustomerID+"");
+                tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
+                tripObject.put("TripID", currentTrip.TripID+"");
+                tripObject.put("TripStatus", status);
+                Log.e("tripObject: ", tripObject + "");
+
+
+            }catch(JSONException e) {
+                e.printStackTrace();
+            }
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
 
                 @Override
-                protected void onPreExecute() {
-                    super.onPreExecute();
-                    progressDialog=new ProgressDialog(getActivity());
-                    progressDialog.setCancelable(true);
-                    progressDialog.setMessage("Loading...");
-                    progressDialog.show();
-                }
+                public void onResponse(JSONObject jobj) {
+                    String response = jobj.toString();
 
-                @Override
-                protected Void doInBackground(Void... params) {
-                    JSONObject tripObject = new JSONObject();
-                    try {
-                        tripObject.put("CustomerID",currentTrip.CustomerID+"");
-                        tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
-                        tripObject.put("TripID", currentTrip.TripID+"");
-                        tripObject.put("TripStatus", status);
-                        Log.e("tripObject: ", tripObject + "");
-
-
-                    }catch(JSONException e) {
-                        e.printStackTrace();
-                    }
-                    JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
-
-                        @Override
-                        public void onResponse(JSONObject jobj) {
-                            String response = jobj.toString();
-
-                            ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                            Log.e("after cancel response: ", responseMessage.Response +"");
-
-                        }
-                    }, new Response.ErrorListener() {
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.e("error response: ",error+"");
-                        }
-                    });
-                    MyApplication.getInstance().addToRequestQueue(req);
-
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    super.onPostExecute(aVoid);
+                    ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+                    Log.e("after cancel response: ", responseMessage.Response +"");
                     progressDialog.dismiss();
-                    Toast.makeText(getActivity(), "Trip "+status+" Successfully", Toast.LENGTH_SHORT).show();
+                    if(responseMessage.Response.equalsIgnoreCase("Success")) {
+                        Toast.makeText(getActivity(), "Trip "+status+" Successfully", Toast.LENGTH_SHORT).show();
+                        getActivity().finish();
+                    } else {
+                        Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                    }
 
-                    getActivity().finish();
+
                 }
-            }.execute();
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("error response: ",error+"");
+                }
+            });
+            MyApplication.getInstance().addToRequestQueue(req);
+
+
 
         }
 

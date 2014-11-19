@@ -55,13 +55,17 @@ public class Trip {
     public String CustomerEmail;
     @SerializedName("CustomerMobile")
     public String CustomerMobile;
+    @SerializedName("isCustomerFeedbackGiven")
+    public String isCustomerFeedbackGiven;
+    @SerializedName("isDriverFeedbackGiven")
+    public String isDriverFeedbackGiven;
 
 
 
     public Trip() {
     }
 
-    public Trip(String tripID, String customerID, String driverID, String pickupLatitude, String pickupLongitude, String pickupAddress, String pickupNote, String dropoffLatitude, String dropoffLongitude, String dropOffAddress, String pickupTime, String tripDate, String tipPercentage, String tripFare, String tripFee, String tripDistance, String paymentType, String tripStatus, String customerName, String driverName, String customerNotificationID, String driverNotificationID, String customerEmail, String customerMobile) {
+    public Trip(String tripID, String customerID, String driverID, String pickupLatitude, String pickupLongitude, String pickupAddress, String pickupNote, String dropoffLatitude, String dropoffLongitude, String dropOffAddress, String pickupTime, String tripDate, String tipPercentage, String tripFare, String tripFee, String tripDistance, String paymentType, String tripStatus, String customerName, String driverName, String customerNotificationID, String driverNotificationID, String customerEmail, String customerMobile, String isCustomerFeedbackGiven, String isDriverFeedbackGiven) {
         TripID = tripID;
         CustomerID = customerID;
         DriverID = driverID;
@@ -86,5 +90,7 @@ public class Trip {
         DriverNotificationID = driverNotificationID;
         CustomerEmail = customerEmail;
         CustomerMobile = customerMobile;
+        this.isCustomerFeedbackGiven = isCustomerFeedbackGiven;
+        this.isDriverFeedbackGiven = isDriverFeedbackGiven;
     }
 }
