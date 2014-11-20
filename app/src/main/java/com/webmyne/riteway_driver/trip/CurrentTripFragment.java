@@ -58,7 +58,6 @@ public class CurrentTripFragment extends Fragment  {
     private MapController mc;
     TextView txtArrivedOnSite;
     private ProgressDialog progressDialog;
-
     public boolean needUpdatedLocation=true;
     double updatedDriverLatitude;
     double updatedDriverLongitude;
@@ -67,6 +66,7 @@ public class CurrentTripFragment extends Fragment  {
     Location currentLocation;
     Location pickupLocation;
     Location dropoffLocation;
+    Trip currentTrip;
 
     public static CurrentTripFragment newInstance(String param1, String param2) {
         CurrentTripFragment fragment = new CurrentTripFragment();
@@ -78,6 +78,8 @@ public class CurrentTripFragment extends Fragment  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+        currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
     }
 
     @Override
@@ -92,8 +94,8 @@ public class CurrentTripFragment extends Fragment  {
 
                 if(txtArrivedOnSite.getText().equals("ARRIVED ON SITE")){
                     AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-                    alert.setTitle("Alert Arived On Site");
-                    alert.setMessage("Send notification to cutomer about you reached at pickup location");
+                    alert.setTitle("Arived On Site Alert");
+                    alert.setMessage("Send notification to customer about you reached at pickup location");
                     alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
                         @Override
@@ -101,11 +103,9 @@ public class CurrentTripFragment extends Fragment  {
 
                             updateArrivedOnSiteStatus();
                             dialog.dismiss();
-
                         }
                     });
-
-                    alert.show();
+                   alert.show();
                 } else if(txtArrivedOnSite.getText().equals("START TRIP")) {
 
                     updateStartTripStatus(AppConstants.tripOnTripStatus);
@@ -119,8 +119,6 @@ public class CurrentTripFragment extends Fragment  {
 
                     SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
                     SharedPreferences.Editor editor=preferencesTimeInterval.edit();
-                        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-                        Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
                     editor.putString("fare",String.format("%.2f", (pickupLocation.distanceTo(currentLocation)/1000)*0.6214*Double.parseDouble(currentTrip.TripFare))+"");
                     editor.putString("dropoff_address",address+"");
                     editor.putString("dropoff_latitude",currentLocation.getLatitude()+"");
@@ -134,16 +132,144 @@ public class CurrentTripFragment extends Fragment  {
                         e.printStackTrace();
                     }
                 }
-
-
-
             }
         });
 
         mv = (MapView)rootView.findViewById(R.id.map);
-        setView(savedInstanceState);
+
+            setView(savedInstanceState);
+
         return rootView;
     }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+        currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+        mv.onResume();
+
+        if(currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripStopStatus)) {
+            txtArrivedOnSite.setText("STOP TRIP");
+            txtArrivedOnSite.setVisibility(View.VISIBLE);
+
+        }
+
+
+
+            if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripArrivedOnSiteStatus)) {
+                txtArrivedOnSite.setText("START TRIP");
+                txtArrivedOnSite.setVisibility(View.VISIBLE);
+            }
+
+            if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripOnTripStatus)) {
+                txtArrivedOnSite.setText("START TRIP");
+                txtArrivedOnSite.setVisibility(View.INVISIBLE);
+            }
+            pickup_latlng = new LatLng(Double.parseDouble(currentTrip.PickupLatitude), Double.parseDouble(currentTrip.PickupLongitude));
+            dropoff_latlng = new LatLng(Double.parseDouble(currentTrip.DropoffLatitude), Double.parseDouble(currentTrip.DropoffLongitude));
+
+            if (pickup_latlng != null) {
+                MarkerOptions opts = new MarkerOptions();
+                opts.position(pickup_latlng);
+                opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pickup_pin));
+                opts.title("PICK ME UP HERE");
+                opts.snippet("");
+                addMarker(opts);
+            }
+
+            if (dropoff_latlng != null) {
+                MarkerOptions opts = new MarkerOptions();
+                opts.position(dropoff_latlng);
+                opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dropoff_pin));
+                opts.title("DROP ME HERE");
+                opts.snippet("");
+                addMarker(opts);
+            }
+
+            Navigator nav = new Navigator(mv.getMap(), pickup_latlng, dropoff_latlng);
+            nav.findDirections(false);
+            nav.setPathColor(Color.parseColor("#4285F4"), Color.BLUE, Color.BLUE);
+
+            pickupLocation = new Location("");
+            pickupLocation.setLatitude(pickup_latlng.latitude);
+            pickupLocation.setLongitude(pickup_latlng.longitude);
+
+            dropoffLocation = new Location("");
+            dropoffLocation.setLatitude(dropoff_latlng.latitude);
+            dropoffLocation.setLongitude(dropoff_latlng.longitude);
+
+            mc.startTrackMyLocation(mc.getMap(), 2000, 0, MapController.TrackType.TRACK_TYPE_NONE, new MapController.ChangeMyLocation() {
+                @Override
+                public void changed(GoogleMap map, Location location, boolean lastLocation) {
+                    currentLocation = location;
+                    int zoom = (int) (mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel() * 2.5));
+                    try {
+                        mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
+
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+
+                    float pickupDistance = location.distanceTo(pickupLocation);
+                    if (pickupDistance < 200) {
+                        if (!txtArrivedOnSite.isShown()) {
+
+                            if (!txtArrivedOnSite.getText().toString().equals("START TRIP") ) {
+                                Toast.makeText(getActivity(), "arrived on site", Toast.LENGTH_SHORT).show();
+                                txtArrivedOnSite.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                    }
+
+                    float dropOffDistance = location.distanceTo(dropoffLocation);
+                    if (dropOffDistance < 200) {
+                        if (txtArrivedOnSite.getText().toString().equals("START TRIP")) {
+                            txtArrivedOnSite.setText("STOP TRIP");
+                            Toast.makeText(getActivity(), "arrived on destination", Toast.LENGTH_SHORT).show();
+                            txtArrivedOnSite.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    if (needUpdatedLocation == true) {
+                        updatedDriverLatitude = location.getLatitude();
+                        updatedDriverLongitude = location.getLongitude();
+                        needUpdatedLocation = false;
+                    }
+                }
+            });
+
+            new CountDownTimer(3000, 1000) {
+                @Override
+                public void onFinish() {
+
+                    try {
+
+                        Timer timer = new Timer();
+                        // stopLoginTimer();
+                        timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+                                updateDriverLocation();
+                            }
+                        }, 0, 1000 * 15);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                }
+            }.start();
+
+
+
+
+    }
+
 
     public String getAddressValue(Location currentLocation) {
         StringBuilder result = new StringBuilder();
@@ -341,144 +467,7 @@ public class CurrentTripFragment extends Fragment  {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mv.onResume();
 
-        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-        Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
-        pickup_latlng=new LatLng(Double.parseDouble(currentTrip.PickupLatitude),Double.parseDouble(currentTrip.PickupLongitude));
-        dropoff_latlng=new LatLng(Double.parseDouble(currentTrip.DropoffLatitude),Double.parseDouble(currentTrip.DropoffLongitude));
-
-        if(pickup_latlng != null) {
-
-            MarkerOptions opts = new MarkerOptions();
-            opts.position(pickup_latlng);
-            opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pickup_pin));
-            opts.title("PICK ME UP HERE");
-            opts.snippet("");
-            addMarker(opts);
-
-
-        }
-
-        if(dropoff_latlng != null) {
-
-            MarkerOptions opts = new MarkerOptions();
-            opts.position(dropoff_latlng);
-            opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dropoff_pin));
-            opts.title("DROP ME HERE");
-            opts.snippet("");
-            addMarker(opts);
-
-
-        }
-
-        Navigator nav = new Navigator(mv.getMap(),pickup_latlng,dropoff_latlng);
-        nav.findDirections(false);
-        nav.setPathColor(Color.parseColor("#4285F4"),Color.BLUE,Color.BLUE);
-
-        pickupLocation=new Location("");
-        pickupLocation.setLatitude(pickup_latlng.latitude);
-        pickupLocation.setLongitude(pickup_latlng.longitude);
-
-        dropoffLocation=new Location("");
-        dropoffLocation.setLatitude(dropoff_latlng.latitude);
-        dropoffLocation.setLongitude(dropoff_latlng.longitude);
-
-
-        SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-        final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
-
-        mc.startTrackMyLocation(mc.getMap(),2000,0, MapController.TrackType.TRACK_TYPE_NONE,new MapController.ChangeMyLocation() {
-            @Override
-            public void changed(GoogleMap map, Location location, boolean lastLocation) {
-                currentLocation=location;
-                int zoom = (int)(mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel()*2.5));
-                try {
-                    mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
-
-                }catch (NullPointerException e){
-                    e.printStackTrace();
-                }
-
-                float pickupDistance=location.distanceTo(pickupLocation);
-                if(pickupDistance<200){
-                    if(!txtArrivedOnSite.isShown() ) {
-
-                        if(!txtArrivedOnSite.getText().toString().equals("START TRIP")) {
-                            Toast.makeText(getActivity(), "arrived on site", Toast.LENGTH_SHORT).show();
-                            txtArrivedOnSite.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                }
-
-                float dropOffDistance=location.distanceTo(dropoffLocation);
-                if(dropOffDistance<200) {
-                    if(txtArrivedOnSite.getText().toString().equals("START TRIP")) {
-                        txtArrivedOnSite.setText("STOP TRIP");
-                        Toast.makeText(getActivity(), "arrived on destination", Toast.LENGTH_SHORT).show();
-                        txtArrivedOnSite.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                if(needUpdatedLocation==true){
-                    updatedDriverLatitude=location.getLatitude();
-                    updatedDriverLongitude=location.getLongitude();
-                    needUpdatedLocation=false;
-                }
-            }
-        });
-
-
-
-//        new CountDownTimer(1500, 1000) {
-//            @Override
-//            public void onFinish() {
-////                int zoom=(int)(mc.getMap().getMaxZoomLevel()*3);
-//                int zoom = (int)(mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel()*2.5));
-//                try {
-//                    mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
-//
-//                }catch (NullPointerException e){
-//                    e.printStackTrace();
-//                }
-//            }
-//            @Override
-//            public void onTick(long millisUntilFinished) {
-//            }
-//        }.start();
-
-
-        new CountDownTimer(3000, 1000) {
-            @Override
-            public void onFinish() {
-
-                try {
-
-                    Timer timer=new Timer();
-                    // stopLoginTimer();
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            updateDriverLocation();
-                        }
-                    },0,1000*15);
-                }catch (NullPointerException e){
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            public void onTick(long millisUntilFinished) {
-            }
-        }.start();
-
-
-
-
-    }
 
 
     private void addMarker(MarkerOptions opts) {
@@ -536,26 +525,35 @@ public class CurrentTripFragment extends Fragment  {
 
     @Override
     public void onPause() {
-        mv.onPause();
-        mc.stopTrackMyLocation();
+        if(!currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripStopStatus)) {
+            mv.onPause();
+            mc.stopTrackMyLocation();
+        }
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        mv.onDestroy();
+
+            mv.onDestroy();
+
         super.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
+
         super.onLowMemory();
-        mv.onLowMemory();
+
+            mv.onLowMemory();
+
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mv.onSaveInstanceState(outState);
+
+            mv.onSaveInstanceState(outState);
+
     }
 }

@@ -2,9 +2,12 @@ package com.webmyne.riteway_driver.notifications;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +16,22 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 
+import com.android.volley.VolleyError;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.webmyne.riteway_driver.R;
+import com.webmyne.riteway_driver.customViews.CallWebService;
+import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.customViews.ListDialog;
+import com.webmyne.riteway_driver.home.DrawerActivity;
+import com.webmyne.riteway_driver.home.DriverProfile;
+import com.webmyne.riteway_driver.model.AppConstants;
+import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class NotificationFragment extends Fragment implements ListDialog.setSelectedListner{
@@ -68,6 +82,8 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
     @Override
     public void onResume() {
         super.onResume();
+
+        unreadAllNotification();
         try {
             sharedPreferenceNotification = new SharedPreferenceNotification();
             notificationList = sharedPreferenceNotification.loadNotification(getActivity());
@@ -79,6 +95,31 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void unreadAllNotification() {
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+        new CallWebService(AppConstants.DriverNotificationsStatusChanged+driverProfile.DriverID , CallWebService.TYPE_JSONOBJECT) {
+
+            @Override
+            public void response(String response) {
+
+
+
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+
+                Log.e("response message for unread all: ",responseMessage.Response+"");
+            }
+
+            @Override
+            public void error(VolleyError error) {
+
+                Log.e("error: ",error+"");
+
+            }
+        }.start();
+
     }
 
     public class NotificationAdapter extends BaseAdapter {
@@ -129,6 +170,10 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
+            }
+            if(notificationList.get(position).notificationStatus.equalsIgnoreCase("false")){
+                holder.txtNotificationDate.setTextColor(Color.GREEN);
+
             }
             holder.txtMessageTitle.setText(notificationList.get(position).Title);
             holder.txtNotificationDate.setText(notificationList.get(position).Date);

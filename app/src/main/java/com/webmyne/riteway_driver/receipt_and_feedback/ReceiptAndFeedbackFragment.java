@@ -104,6 +104,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
                 completTrip();
             }
         });
+        txtPaymentType.setText("Cash");
         txtPaymentType.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -240,13 +241,13 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
     }
     public double getTotal(Trip currentTrip) {
         Double total;
-        String tripFareValue=String.format("%.2f", Double.parseDouble(currentTrip.TripDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));
+//        String tripFareValue=String.format("%.2f", Double.parseDouble(newDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));
         if(Integer.parseInt(currentTrip.TipPercentage)>0){
 
-            Double tip=((Double.parseDouble(tripFareValue)*Double.parseDouble(currentTrip.TipPercentage))/100);
-            total= Double.parseDouble(tripFareValue)+tip;
+            Double tip=((Double.parseDouble(newFare)*Double.parseDouble(currentTrip.TipPercentage))/100);
+            total= Double.parseDouble(newFare)+tip;
         } else {
-            total=Double.parseDouble(tripFareValue);
+            total=Double.parseDouble(newFare);
         }
         total=total+Double.parseDouble(currentTrip.TripFee);
         return total;

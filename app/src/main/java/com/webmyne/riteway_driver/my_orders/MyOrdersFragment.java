@@ -2,6 +2,13 @@ package com.webmyne.riteway_driver.my_orders;
 
 import android.app.ProgressDialog;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,23 +19,38 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.webmyne.riteway_driver.R;
+import com.webmyne.riteway_driver.application.MyApplication;
 import com.webmyne.riteway_driver.customViews.CallWebService;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.AppConstants;
+import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.PagerSlidingTabStrip;
+import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
 import com.webmyne.riteway_driver.notifications.DriverNotification;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.Type;
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MyOrdersFragment extends Fragment {
@@ -36,10 +58,16 @@ public class MyOrdersFragment extends Fragment {
     private SharedPreferenceNotification sharedPreferenceNotification;
     private PagerSlidingTabStrip tabs;
     private ViewPager pager;
+    private int badgeValue=0;
     private MyPagerAdapter adapter;
     ProgressDialog progressDialog;
      ArrayList<Trip> tripArrayList;
      ArrayList<DriverNotification> notificationList;
+
+    private String latituteValue;
+    private String longitudeValue;
+    private LocationManager locationManager;
+    private String provider;
 
     public static MyOrdersFragment newInstance(String param1, String param2) {
         MyOrdersFragment fragment = new MyOrdersFragment();
@@ -53,7 +81,6 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -67,18 +94,76 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+//        try {
+//            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+//            final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
+//            Timer timer=new Timer();
+//            timer.scheduleAtFixedRate(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    updateDriverLocation();
+//                }
+//            },0,1000*Integer.parseInt(updatedTimeInterval));
+//        }catch (NullPointerException e){
+//            e.printStackTrace();
+//        }
+
         getTripList();
         sharedPreferenceTrips=new SharedPreferenceTrips();
         sharedPreferenceNotification=new SharedPreferenceNotification();
     }
 
 
+    public void updateDriverLocation() {
+
+
+//        needUpdatedLocation=true;
+//        Log.e("latitude: ",updatedDriverLatitude+"");
+//        Log.e("Longitude",updatedDriverLongitude+"");
+//
+//        JSONObject driverCurrentLocation = new JSONObject();
+//        try {
+//
+//            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+//            DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+//            driverCurrentLocation.put("DriverID", driverProfile.DriverID);
+//            driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
+//            driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+//
+//        }catch(JSONException e) {
+//            e.printStackTrace();
+//        }
+//        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverCurrentLocation, driverCurrentLocation, new Response.Listener<JSONObject>() {
+//
+//            @Override
+//            public void onResponse(JSONObject jobj) {
+//                String response = jobj.toString();
+//                Log.e("response after update driver location: ", response + "");
+//                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
+//                Log.e("Response: ",responseMessage.Response+"");
+//
+//
+//            }
+//        }, new Response.ErrorListener() {
+//
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("error response: ",error+"");
+//            }
+//        });
+//        MyApplication.getInstance().addToRequestQueue(req);
+
+    }
+
+
+
     public void getTripList() {
 
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
-        final DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
 
-        Log.e("list: ", AppConstants.DriverTrips+"9");
+        Log.e("url: ", AppConstants.DriverTrips+driverProfile.DriverID );
         progressDialog=new ProgressDialog(getActivity());
         progressDialog.setCancelable(true);
         progressDialog.setMessage("Loading...");
@@ -111,15 +196,12 @@ public class MyOrdersFragment extends Fragment {
             public void error(VolleyError error) {
 
                 Log.e("error: ",error+"");
-
             }
         }.start();
 
-
-
-
-
     }
+
+
 
     public void getNotificationList() {
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
@@ -137,9 +219,18 @@ public class MyOrdersFragment extends Fragment {
 //                Log.e("notification list size:",notificationList.size()+"");
                 sharedPreferenceNotification.clearNotification(getActivity());
                 for(int i=0;i<notificationList.size();i++){
+
+                            if(notificationList.get(i).notificationStatus.equalsIgnoreCase("false")){
+                                badgeValue=badgeValue+1;
+                            }
                     sharedPreferenceNotification.saveNotification(getActivity(),notificationList.get(i));
                     Log.e("notification id: ",notificationList.get(i).notificationStatus+"");
                 }
+                Log.e("Badge value: ",badgeValue+"");
+                SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("badge_value",getActivity().MODE_PRIVATE);
+                SharedPreferences.Editor editor=preferencesTimeInterval.edit();
+                editor.putString("badge_value",badgeValue+"");
+                editor.commit();
                 progressDialog.dismiss();
             }
 

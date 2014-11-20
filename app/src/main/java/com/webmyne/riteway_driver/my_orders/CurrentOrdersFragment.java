@@ -145,17 +145,24 @@ public class CurrentOrdersFragment extends Fragment {
             holder.currentOrderDropoffLocation.setText("dropoff: "+currentOrdersList.get(position).DropOffAddress);
             holder.currentOrderFareAmount.setText(String.format("$ %.2f", getTotal(currentOrdersList.get(position)))+"");
             holder.orderHistoryStatus.setText("status: "+currentOrdersList.get(position).TripStatus);
+            if(currentOrdersList.get(position).isCustomerFeedbackGiven.equalsIgnoreCase("false") && (!currentOrdersList.get(position).TripStatus.equalsIgnoreCase(AppConstants.tripInProgressStatus))){
+                holder. mapView.setVisibility(View.VISIBLE);
+            } else {
+                holder. mapView.setVisibility(View.GONE);
+            }
             holder. mapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-                    complexPreferences.putObject("current_trip_details", currentOrdersList.get(position));
-                    complexPreferences.commit();
-                    FragmentManager manager = getActivity().getSupportFragmentManager();
-                    FragmentTransaction ft = manager.beginTransaction();
-                    CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
-                    if (manager.findFragmentByTag("CURRENT_TRIP") == null) {
-                        ft.replace(R.id.main_content, currentTripFragment,"CURRENT_TRIP").commit();
+                    if(currentOrdersList.get(position).isCustomerFeedbackGiven.equalsIgnoreCase("false")) {
+                        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+                        complexPreferences.putObject("current_trip_details", currentOrdersList.get(position));
+                        complexPreferences.commit();
+                        FragmentManager manager = getActivity().getSupportFragmentManager();
+                        FragmentTransaction ft = manager.beginTransaction();
+                        CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
+                        if (manager.findFragmentByTag("CURRENT_TRIP") == null) {
+                            ft.replace(R.id.main_content, currentTripFragment, "CURRENT_TRIP").commit();
+                        }
                     }
                 }
             });

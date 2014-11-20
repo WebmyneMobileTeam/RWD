@@ -2,6 +2,7 @@ package com.webmyne.riteway_driver.home;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -28,13 +29,16 @@ import com.webmyne.riteway_driver.notifications.NotificationFragment;
 import com.webmyne.riteway_driver.settings.SettingsFragment;
 import com.webmyne.riteway_driver.trip.CurrentTripFragment;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class DrawerActivity extends BaseActivity implements AdapterView.OnItemClickListener {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerArrowDrawable drawerArrow;
     private DrawerLayout drawer;
     private ListView leftDrawerList;
-
-    private String[] leftSliderData = {"CURRENT TRIP", "MY ORDERS", "NOTIFICATIONS", "SETTINGS"};
+    private String badgevalue;
+    private String[] leftSliderData = {"MY ORDERS", "NOTIFICATIONS", "SETTINGS"};
 
     public static String CURRENT_TRIP = "current_trip";
     public static String MY_ORDERS = "my_orders";
@@ -71,9 +75,11 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     protected void onResume() {
         super.onResume();
 
-        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(DrawerActivity.this, "driver_data", 0);
-        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-        Log.e("driver notification id: ",driverProfile.Webmyne_NotificationID+"");
+
+//        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(DrawerActivity.this, "driver_data", 0);
+//        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+//        Log.e("driver notification id: ",driverProfile.Webmyne_NotificationID+"");
+
 
 //        if(OrderDetailActivity.isAcceptRequest==true){
 //            OrderDetailActivity.isAcceptRequest=false;
@@ -87,7 +93,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
 //            txtHeader.setText("CURRENT TRIP");
 //
 //        }
-    }
+}
 
     private void initFields() {
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -112,11 +118,15 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
+                SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
+                badgevalue=(sharedPreferences.getString("badge_value",null));
                 invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
+                badgevalue=(sharedPreferences.getString("badge_value",null));
                 invalidateOptionsMenu();
             }
         };
@@ -135,15 +145,8 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
 
         switch (position) {
 
-            case 0:
-                CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
-                if (manager.findFragmentByTag(CURRENT_TRIP) == null) {
-                    ft.replace(R.id.main_content, currentTripFragment,CURRENT_TRIP).commit();
-                }
-                txtHeader.setText("CURRENT TRIP");
-                break;
 
-            case 1:
+            case 0:
                 MyOrdersFragment myOrdersFragment = MyOrdersFragment.newInstance("", "");
                 if (manager.findFragmentByTag(MY_ORDERS) == null) {
                     ft.replace(R.id.main_content, myOrdersFragment,MY_ORDERS).commit();
@@ -152,7 +155,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
                 break;
 
 
-            case 2:
+            case 1:
                 NotificationFragment notificationFragment = NotificationFragment.newInstance("", "");
                 if (manager.findFragmentByTag(NOTIFICATIONS) == null) {
                     ft.replace(R.id.main_content, notificationFragment,NOTIFICATIONS).commit();
@@ -160,7 +163,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
                 txtHeader.setText("NOTIFICATIONS");
                 break;
 
-            case 3:
+            case 2:
                 SettingsFragment settingsFragment = SettingsFragment.newInstance("", "");
                 if (manager.findFragmentByTag(SETTINGS) == null) {
                     ft.replace(R.id.main_content, settingsFragment,SETTINGS).commit();
@@ -190,65 +193,72 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
         mDrawerToggle.syncState();
     }
 
-    //region Drawer code
-    // Navigation Drawer Adapter
-    public class NavigationDrawerAdapter extends BaseAdapter {
+//region Drawer code
+// Navigation Drawer Adapter
+public class NavigationDrawerAdapter extends BaseAdapter {
 
-        Context context;
-        LayoutInflater inflater;
-        String[] leftSliderData;
+    Context context;
+    LayoutInflater inflater;
+    String[] leftSliderData;
 
-        public NavigationDrawerAdapter(Context context, String[] leftSliderData) {
-            this.context = context;
-            this.leftSliderData = leftSliderData;
-        }
+    public NavigationDrawerAdapter(Context context, String[] leftSliderData) {
+        this.context = context;
+        this.leftSliderData = leftSliderData;
+    }
 
-        public int getCount() {
+    public int getCount() {
 
-            return leftSliderData.length;
-
-        }
-
-        public Object getItem(int position) {
-            return leftSliderData[position];
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public class ViewHolder {
-            TextView txtDrawerItem;
-            TextView txtBadgeValue;
-        }
-
-
-        public View getView(final int position, View convertView,
-                            ViewGroup parent) {
-
-            final ViewHolder holder;
-            LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.item_drawer, parent, false);
-                holder = new ViewHolder();
-                holder.txtDrawerItem = (TextView) convertView.findViewById(R.id.txtDrawerItem);
-                holder.txtBadgeValue = (TextView) convertView.findViewById(R.id.txtBadgeValue);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            if(position==2) {
-                holder.txtBadgeValue.setVisibility(View.VISIBLE);
-            } else {
-                holder.txtBadgeValue.setVisibility(View.GONE);
-            }
-            holder.txtDrawerItem.setText(leftSliderData[position]);
-            return convertView;
-
-        }
+        return leftSliderData.length;
 
     }
+
+    public Object getItem(int position) {
+        return leftSliderData[position];
+    }
+
+    public long getItemId(int position) {
+        return position;
+    }
+
+    public class ViewHolder {
+        TextView txtDrawerItem;
+        TextView txtBadgeValue;
+    }
+
+
+    public View getView(final int position, View convertView,
+                        ViewGroup parent) {
+
+        final ViewHolder holder;
+        LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.item_drawer, parent, false);
+            holder = new ViewHolder();
+            holder.txtDrawerItem = (TextView) convertView.findViewById(R.id.txtDrawerItem);
+            holder.txtBadgeValue = (TextView) convertView.findViewById(R.id.txtBadgeValue);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+        if(position==1) {
+
+            Log.e("badge value:.....",badgevalue+"");
+            if(badgevalue !=null && (!badgevalue.equalsIgnoreCase("0"))){
+                holder.txtBadgeValue.setVisibility(View.VISIBLE);
+                holder.txtBadgeValue.setText(badgevalue+"");
+                notifyDataSetChanged();
+            }
+
+        } else {
+            holder.txtBadgeValue.setVisibility(View.GONE);
+        }
+        holder.txtDrawerItem.setText(leftSliderData[position]);
+        return convertView;
+
+    }
+
+}
     //</editor-fold>
 
 
