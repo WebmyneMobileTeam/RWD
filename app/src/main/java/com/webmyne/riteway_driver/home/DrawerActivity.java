@@ -39,7 +39,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     private ListView leftDrawerList;
     private String badgevalue;
     private String[] leftSliderData = {"MY ORDERS", "NOTIFICATIONS", "SETTINGS"};
-
+    NavigationDrawerAdapter navigationDrawerAdapter;
     public static String CURRENT_TRIP = "current_trip";
     public static String MY_ORDERS = "my_orders";
 
@@ -71,11 +71,19 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
         initFields();
         initDrawer();
     }
+    private void initFields() {
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        leftDrawerList = (ListView) findViewById(R.id.left_drawer);
+        leftDrawerList.setOnItemClickListener(this);
+
+    }
     @Override
     protected void onResume() {
         super.onResume();
-
-
+        navigationDrawerAdapter=new NavigationDrawerAdapter(DrawerActivity.this, leftSliderData);
+        leftDrawerList.setAdapter(navigationDrawerAdapter);
+        SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
+        badgevalue=(sharedPreferences.getString("badge_value",null));
 //        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(DrawerActivity.this, "driver_data", 0);
 //        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
 //        Log.e("driver notification id: ",driverProfile.Webmyne_NotificationID+"");
@@ -95,13 +103,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
 //        }
 }
 
-    private void initFields() {
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        leftDrawerList = (ListView) findViewById(R.id.left_drawer);
-        leftDrawerList.setAdapter(new NavigationDrawerAdapter(DrawerActivity.this, leftSliderData));
-        leftDrawerList.setOnItemClickListener(this);
 
-    }
 
     private void initDrawer() {
 
@@ -118,16 +120,15 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
-                badgevalue=(sharedPreferences.getString("badge_value",null));
-                invalidateOptionsMenu();
+
+
             }
 
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
                 badgevalue=(sharedPreferences.getString("badge_value",null));
-                invalidateOptionsMenu();
+                navigationDrawerAdapter.notifyDataSetChanged();
             }
         };
         drawer.setDrawerListener(mDrawerToggle);
@@ -248,8 +249,9 @@ public class NavigationDrawerAdapter extends BaseAdapter {
                 holder.txtBadgeValue.setVisibility(View.VISIBLE);
                 holder.txtBadgeValue.setText(badgevalue+"");
                 notifyDataSetChanged();
+            } else {
+                holder.txtBadgeValue.setVisibility(View.GONE);
             }
-
         } else {
             holder.txtBadgeValue.setVisibility(View.GONE);
         }

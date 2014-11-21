@@ -31,6 +31,7 @@ import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -87,7 +88,7 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
         try {
             sharedPreferenceNotification = new SharedPreferenceNotification();
             notificationList = sharedPreferenceNotification.loadNotification(getActivity());
-
+            Collections.reverse(notificationList);
             if (notificationList != null) {
                 notificationAdapter = new NotificationAdapter(getActivity(), notificationList);
                 lvCustomerNotifications.setAdapter(notificationAdapter);

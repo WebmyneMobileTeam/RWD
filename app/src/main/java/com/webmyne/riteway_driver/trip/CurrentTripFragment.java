@@ -14,6 +14,8 @@ import android.os.Bundle;
 
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +44,7 @@ import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.my_orders.Trip;
 import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackActivity;
+import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -348,11 +351,9 @@ public class CurrentTripFragment extends Fragment  {
                 ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
                 Log.e("Response: ",responseMessage.Response+"");
                 progressDialog.dismiss();
-                if(responseMessage.Response.equalsIgnoreCase("Success")){
+
                     txtArrivedOnSite.setText("START TRIP");
-                } else {
-                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
-                }
+
 
             }
         }, new Response.ErrorListener() {
@@ -449,8 +450,14 @@ public class CurrentTripFragment extends Fragment  {
                 progressDialog.dismiss();
                 if(responseMessage.Response.equalsIgnoreCase("Success")) {
 //                    Toast.makeText(getActivity(), "Trip Stop Successfully", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(getActivity(), ReceiptAndFeedbackActivity.class);
-                    startActivity(i);
+                    FragmentManager manager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction ft = manager.beginTransaction();
+
+                    ReceiptAndFeedbackFragment receiptAndFeedbackFragment = ReceiptAndFeedbackFragment.newInstance("", "");
+                    if (manager.findFragmentByTag("RECEIPT_AND_FEEDBACK") == null) {
+                        ft.replace(R.id.main_content, receiptAndFeedbackFragment,"RECEIPT_AND_FEEDBACK").commit();
+                    }
+
                 } else {
                     Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
                 }

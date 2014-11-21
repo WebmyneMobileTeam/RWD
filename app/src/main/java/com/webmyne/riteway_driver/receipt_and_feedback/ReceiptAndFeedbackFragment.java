@@ -175,7 +175,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
                 Log.e("Response: ",responseMessage.Response+"");
                 progressDialog.dismiss();
 
-                if(responseMessage.Response.equalsIgnoreCase("Success")){
+
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     Toast.makeText(getActivity(), "Trip completed Successfully", Toast.LENGTH_SHORT).show();
                     FragmentTransaction ft = manager.beginTransaction();
@@ -183,9 +183,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
                     if (manager.findFragmentByTag("MY_ORDERS") == null) {
                         ft.replace(R.id.main_content, myOrdersFragment,"MY_ORDERS").commit();
                     }
-                } else {
-                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
-                }
+
 
 
             }
