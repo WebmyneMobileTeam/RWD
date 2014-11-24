@@ -139,7 +139,7 @@ public class CurrentOrdersFragment extends Fragment {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            holder.currentOrderCname.setText(currentOrdersList.get(position).DriverName);
+            holder.currentOrderCname.setText(currentOrdersList.get(position).CustomerName);
             holder.currentOrderDate.setText(getFormatedDate(currentOrdersList.get(position)));
             holder.currentOrderPickupLocation.setText("pickup: "+currentOrdersList.get(position).PickupAddress);
             holder.currentOrderDropoffLocation.setText("dropoff: "+currentOrdersList.get(position).DropOffAddress);

@@ -635,7 +635,7 @@
 
     <LinearLayout
         android:id="@+id/bottomButtonSelection"
-        android:padding="8dp"
+        android:padding="10dp"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:background="@color/actionbar"

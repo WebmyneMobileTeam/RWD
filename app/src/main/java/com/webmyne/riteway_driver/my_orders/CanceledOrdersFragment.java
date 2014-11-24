@@ -141,7 +141,7 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            holder.orderHistoryCname.setText(currentOrdersList.get(position).DriverName);
+            holder.orderHistoryCname.setText(currentOrdersList.get(position).CustomerName);
             holder.orderHistoryDate.setText(getFormatedDate(currentOrdersList.get(position)));
             holder.orderHistoryPickupLocation.setText("pickup: "+currentOrdersList.get(position).PickupAddress);
             holder.orderHistoryDropoffLocation.setText("dropoff: "+currentOrdersList.get(position).DropOffAddress);

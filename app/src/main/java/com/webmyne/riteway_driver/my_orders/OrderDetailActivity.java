@@ -3,6 +3,8 @@ package com.webmyne.riteway_driver.my_orders;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -25,6 +27,7 @@ import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
 import com.webmyne.riteway_driver.application.MyApplication;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.CustomTypeface;
 import com.webmyne.riteway_driver.model.ResponseMessage;
@@ -32,6 +35,7 @@ import com.webmyne.riteway_driver.model.ResponseMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -111,14 +115,22 @@ public class OrderDetailActivity extends BaseActivity {
             txtCancelTrip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    tripResponse("Cancelled By Driver");
+                    if(isConnected()==true) {
+                        tripResponse("Cancelled By Driver");
+                    }else {
+                        Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
             txtAcceptTrip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    tripResponse("Accept");
+                    if(isConnected()==true) {
+                        tripResponse("Accept");
+                    } else {
+                        Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
             bottomButtonSelection=(LinearLayout)rootView.findViewById(R.id.bottomButtonSelection);
@@ -143,6 +155,15 @@ public class OrderDetailActivity extends BaseActivity {
             return rootView;
         }
 
+        public  boolean isConnected() {
+
+            ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null &&
+                    activeNetwork.isConnectedOrConnecting();
+            return  isConnected;
+        }
         @Override
         public void onResume() {
             super.onResume();
@@ -150,7 +171,7 @@ public class OrderDetailActivity extends BaseActivity {
             currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
             currentTripMobile.setText(currentTrip.CustomerMobile);
             currentTripEmail.setText(currentTrip.CustomerEmail);
-            currentTripDriverName.setText(currentTrip.DriverName);
+            currentTripDriverName.setText(currentTrip.CustomerName);
             currentTripPickup.setText(currentTrip.PickupAddress);
             currentTripDropoff.setText(currentTrip.DropOffAddress);
             currentTripPickupNote.setText(currentTrip.PickupNote);
@@ -172,10 +193,10 @@ public class OrderDetailActivity extends BaseActivity {
             currentTripFee.setText("$ "+currentTrip.TripFee);
             txtTotalAmount.setText(String.format("$ %.2f", getTotal(currentTrip))+"");
             txtTripStatus.setText(currentTrip.TripStatus);
-            if(currentTrip.TripStatus.contains(AppConstants.tripAcceptStatus) || currentTrip.TripStatus.contains(AppConstants.tripCancelledByDriverStatus) || currentTrip.TripStatus.contains(AppConstants.tripCancelledByCustomerStatus)){
-                bottomButtonSelection.setVisibility(View.GONE);
-            } else {
+            if(currentTrip.TripStatus.contains(AppConstants.tripInProgressStatus) ){
                 bottomButtonSelection.setVisibility(View.VISIBLE);
+            } else {
+                bottomButtonSelection.setVisibility(View.GONE);
             }
         }
 
@@ -212,52 +233,51 @@ public class OrderDetailActivity extends BaseActivity {
         }
 
         public void tripResponse(final String status) {
-            progressDialog=new ProgressDialog(getActivity());
-            progressDialog.setCancelable(true);
-            progressDialog.setMessage("Loading...");
-            progressDialog.show();
-
-            JSONObject tripObject = new JSONObject();
-            try {
-                tripObject.put("CustomerID",currentTrip.CustomerID+"");
-                tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
-                tripObject.put("TripID", currentTrip.TripID+"");
-                tripObject.put("TripStatus", status);
-                Log.e("tripObject: ", tripObject + "");
-
-
-            }catch(JSONException e) {
-                e.printStackTrace();
-            }
-            JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
+            new AsyncTask<Void,Void,Void>(){
+                @Override
+                protected void onPreExecute() {
+                    super.onPreExecute();
+                    progressDialog=new ProgressDialog(getActivity());
+                    progressDialog.setCancelable(false);
+                    progressDialog.setMessage("Loading...");
+                    progressDialog.show();
+                }
 
                 @Override
-                public void onResponse(JSONObject jobj) {
-                    String response = jobj.toString();
+                protected Void doInBackground(Void... params) {
 
-                    ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                    Log.e("after cancel response: ", responseMessage.Response +"");
-                    progressDialog.dismiss();
-                    if(responseMessage.Response.equalsIgnoreCase("Success")) {
-                        Toast.makeText(getActivity(), "Trip "+status+" Successfully", Toast.LENGTH_SHORT).show();
-                        getActivity().finish();
-                    } else {
-                        Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+                    JSONObject tripObject = new JSONObject();
+                    try {
+                        tripObject.put("CustomerID",currentTrip.CustomerID+"");
+                        tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
+                        tripObject.put("TripID", currentTrip.TripID+"");
+                        tripObject.put("TripStatus", status);
+                        Log.e("tripObject: ", tripObject + "");
+
+
+                    }catch(JSONException e) {
+                        e.printStackTrace();
                     }
 
+                    Reader reader = API.callWebservicePost(AppConstants.RequestedTripStatus, tripObject.toString());
 
+                    ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                    Log.e("responseMessage:",responseMessage.Response+"");
+                    handlePostData();
+                    return null;
                 }
-            }, new Response.ErrorListener() {
+            }.execute();
 
+        }
+
+        public void handlePostData() {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e("error response: ",error+"");
+                public void run() {
+                    progressDialog.dismiss();
+                    getActivity().finish();
                 }
             });
-            MyApplication.getInstance().addToRequestQueue(req);
-
-
-
         }
 
     }

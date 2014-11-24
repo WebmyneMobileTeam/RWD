@@ -14,10 +14,7 @@ import com.webmyne.riteway_driver.model.CustomTypeface;
 import com.webmyne.riteway_driver.model.MapController;
 
 
-/**
- * Application class that called once when application is installed for the first time on device.
- * This class includes the integration of Volly [third party framework for calling webservices]
- */
+
 public class MyApplication extends Application {
 
 

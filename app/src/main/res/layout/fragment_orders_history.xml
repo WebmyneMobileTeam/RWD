@@ -29,7 +29,7 @@
 
     <TextView
         android:id="@+id/txtDateSelection"
-        android:padding="4dp"
+        android:padding="10dp"
         android:gravity="center"
         android:background="@color/actionbar"
         android:layout_alignParentBottom="true"

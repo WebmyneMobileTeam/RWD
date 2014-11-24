@@ -2,9 +2,7 @@ package com.webmyne.riteway_driver.notifications;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by nirav on 13-11-2014.
- */
+
 public class DriverNotification {
 
     @SerializedName("Date")

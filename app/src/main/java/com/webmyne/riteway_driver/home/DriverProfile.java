@@ -2,9 +2,7 @@ package com.webmyne.riteway_driver.home;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by nirav on 12-11-2014.
- */
+
 public class DriverProfile {
 
 

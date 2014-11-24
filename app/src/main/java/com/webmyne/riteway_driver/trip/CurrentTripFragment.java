@@ -2,6 +2,7 @@ package com.webmyne.riteway_driver.trip;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.os.CountDownTimer;
@@ -39,6 +43,7 @@ import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.home.DriverProfile;
+import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.ResponseMessage;
@@ -49,6 +54,7 @@ import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackFragmen
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -62,14 +68,16 @@ public class CurrentTripFragment extends Fragment  {
     TextView txtArrivedOnSite;
     private ProgressDialog progressDialog;
     public boolean needUpdatedLocation=true;
+    Location currentLocation;
     double updatedDriverLatitude;
     double updatedDriverLongitude;
     LatLng pickup_latlng;
     LatLng dropoff_latlng;
-    Location currentLocation;
+
     Location pickupLocation;
     Location dropoffLocation;
     Trip currentTrip;
+
 
     public static CurrentTripFragment newInstance(String param1, String param2) {
         CurrentTripFragment fragment = new CurrentTripFragment();
@@ -103,8 +111,11 @@ public class CurrentTripFragment extends Fragment  {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-                            updateArrivedOnSiteStatus();
+                            if(isConnected()==true) {
+                                updateArrivedOnSiteStatus();
+                            } else {
+                                Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                            }
                             dialog.dismiss();
                         }
                     });
@@ -146,6 +157,7 @@ public class CurrentTripFragment extends Fragment  {
     }
 
 
+
     @Override
     public void onResume() {
         super.onResume();
@@ -158,8 +170,6 @@ public class CurrentTripFragment extends Fragment  {
             txtArrivedOnSite.setVisibility(View.VISIBLE);
 
         }
-
-
 
             if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripArrivedOnSiteStatus)) {
                 txtArrivedOnSite.setText("START TRIP");
@@ -207,10 +217,10 @@ public class CurrentTripFragment extends Fragment  {
                 @Override
                 public void changed(GoogleMap map, Location location, boolean lastLocation) {
                     currentLocation = location;
-                    int zoom = (int) (mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel() * 2.5));
-                    try {
-                        mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
 
+                    try {
+                        int zoom = (int) (mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel() * 2.5));
+                            mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
@@ -244,6 +254,8 @@ public class CurrentTripFragment extends Fragment  {
                 }
             });
 
+
+
             new CountDownTimer(3000, 1000) {
                 @Override
                 public void onFinish() {
@@ -255,7 +267,9 @@ public class CurrentTripFragment extends Fragment  {
                         timer.scheduleAtFixedRate(new TimerTask() {
                             @Override
                             public void run() {
-                                updateDriverLocation();
+
+                                    updateDriverLocation();
+
                             }
                         }, 0, 1000 * 15);
                     } catch (NullPointerException e) {
@@ -273,6 +287,15 @@ public class CurrentTripFragment extends Fragment  {
 
     }
 
+    public  boolean isConnected() {
+
+        ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return  isConnected;
+    }
 
     public String getAddressValue(Location currentLocation) {
         StringBuilder result = new StringBuilder();
@@ -325,49 +348,52 @@ public class CurrentTripFragment extends Fragment  {
     }
 
     public void updateArrivedOnSiteStatus(){
-        progressDialog=new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
 
-        JSONObject driverStatusObject = new JSONObject();
-        try {
-            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-            Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
-            driverStatusObject.put("CustomerID", currentTrip.CustomerID);
-            driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
-            driverStatusObject.put("TripID", currentTrip.TripID);
-            driverStatusObject.put("TripStatus", AppConstants.tripArrivedOnSiteStatus);
-            Log.e("driverStatusObject: ", driverStatusObject + "");
-        }catch(JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverArrivedNotification, driverStatusObject, new Response.Listener<JSONObject>() {
-
+        new AsyncTask<Void,Void,Void>(){
             @Override
-            public void onResponse(JSONObject jobj) {
-                String response = jobj.toString();
-                Log.e("response continue: ", response + "");
-                ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                Log.e("Response: ",responseMessage.Response+"");
-                progressDialog.dismiss();
-
-                    txtArrivedOnSite.setText("START TRIP");
-
-
+            protected void onPreExecute() {
+                super.onPreExecute();
+                progressDialog=new ProgressDialog(getActivity());
+                progressDialog.setCancelable(false);
+                progressDialog.setMessage("Loading...");
+                progressDialog.show();
             }
-        }, new Response.ErrorListener() {
 
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("error response: ",error+"");
+            protected Void doInBackground(Void... params) {
+
+                JSONObject driverStatusObject = new JSONObject();
+                try {
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+                    Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+                    driverStatusObject.put("CustomerID", currentTrip.CustomerID);
+                    driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
+                    driverStatusObject.put("TripID", currentTrip.TripID);
+                    driverStatusObject.put("TripStatus", AppConstants.tripArrivedOnSiteStatus);
+                    Log.e("driverStatusObject: ", driverStatusObject + "");
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+
+                Reader reader = API.callWebservicePost(AppConstants.DriverArrivedNotification, driverStatusObject.toString());
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                Log.e("responseMessage:",responseMessage.Response+"");
+                handlePostData();
+                return null;
+            }
+
+
+        }.execute();
+    }
+    public void handlePostData() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.dismiss();
+                txtArrivedOnSite.setText("START TRIP");
             }
         });
-        MyApplication.getInstance().addToRequestQueue(req);
-
-
     }
-
 
     public void updateStartTripStatus(final String status) {
         progressDialog=new ProgressDialog(getActivity());
@@ -493,49 +519,48 @@ public class CurrentTripFragment extends Fragment  {
         Log.e("latitude: ",updatedDriverLatitude+"");
         Log.e("Longitude",updatedDriverLongitude+"");
 
-        JSONObject driverCurrentLocation = new JSONObject();
-        try {
 
-            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
-            DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-            driverCurrentLocation.put("DriverID", driverProfile.DriverID);
-            driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
-            driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
-
-
-
-
-        }catch(JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverCurrentLocation, driverCurrentLocation, new Response.Listener<JSONObject>() {
+        new AsyncTask<Void,Void,Void>(){
 
             @Override
-            public void onResponse(JSONObject jobj) {
-                String response = jobj.toString();
-                Log.e("response after update driver location: ", response + "");
-                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                Log.e("Response: ",responseMessage.Response+"");
+            protected Void doInBackground(Void... params) {
+                JSONObject driverCurrentLocation = new JSONObject();
+                try {
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+                    driverCurrentLocation.put("DriverID", driverProfile.DriverID);
+                    driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
+                    driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+                Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
+
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                Log.e("responseMessage:",responseMessage.Response+"");
+                return null;
 
 
             }
-        }, new Response.ErrorListener() {
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("error response: ",error+"");
-            }
-        });
-        MyApplication.getInstance().addToRequestQueue(req);
+
+        }.execute();
+
+
+
+
 
     }
 
+
+
     @Override
     public void onPause() {
-        if(!currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripStopStatus)) {
+
             mv.onPause();
             mc.stopTrackMyLocation();
-        }
+
         super.onPause();
     }
 

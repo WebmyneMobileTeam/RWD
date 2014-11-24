@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.android.volley.VolleyError;
@@ -83,8 +86,11 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
     @Override
     public void onResume() {
         super.onResume();
-
-        unreadAllNotification();
+        if(isConnected()==true) {
+            unreadAllNotification();
+        } else {
+            Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+        }
         try {
             sharedPreferenceNotification = new SharedPreferenceNotification();
             notificationList = sharedPreferenceNotification.loadNotification(getActivity());
@@ -97,6 +103,18 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
             e.printStackTrace();
         }
     }
+
+
+    public  boolean isConnected() {
+
+        ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return  isConnected;
+    }
+
 
     public void unreadAllNotification() {
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);

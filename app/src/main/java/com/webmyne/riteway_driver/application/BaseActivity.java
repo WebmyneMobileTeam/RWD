@@ -17,11 +17,7 @@ import android.widget.TextView;
 import com.webmyne.riteway_driver.R;
 
 
-/**
- * Created by nirav.
- * Base activity for application.
- * Contains basic actionbar integration for all the screen which extends this Activity.
- */
+
 public class BaseActivity extends FragmentActivity {
 
     public TextView txtHeader;

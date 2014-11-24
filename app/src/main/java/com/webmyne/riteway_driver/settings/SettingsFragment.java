@@ -2,10 +2,14 @@ package com.webmyne.riteway_driver.settings;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,12 +31,16 @@ import com.webmyne.riteway_driver.customViews.ListDialog;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
+import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
+import com.webmyne.riteway_driver.model.GPSTracker;
 import com.webmyne.riteway_driver.model.ResponseMessage;
+import com.webmyne.riteway_driver.my_orders.MyOrdersFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,7 +51,10 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     ArrayList<String> timeList;
     Switch driverStatusSwitch;
     ProgressDialog progressDialog;
-
+    GPSTracker gpsTracker;
+    double updatedDriverLatitude;
+    double updatedDriverLongitude;
+    public static Timer timer;
 //    private static int CLICKED_POSITION = 0;
     public static SettingsFragment newInstance(String param1, String param2) {
         SettingsFragment fragment = new SettingsFragment();
@@ -57,6 +68,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        gpsTracker = new GPSTracker(getActivity());
         timeList=new ArrayList<String>();
         timeList.add("1");
         timeList.add("2");
@@ -89,65 +101,66 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
             public void onClick(View v) {
                 if(driverStatusSwitch.isChecked()) {
                     AppConstants.driverStatusBoolValue=true;
-                    updateDriverStatus();
+                    if(isConnected()==true) {
+                        updateDriverStatus();
+                    } else {
+                        Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     AppConstants.driverStatusBoolValue=false;
-                    updateDriverStatus();
+                    if(isConnected()==true) {
+                        updateDriverStatus();
+                    } else {
+                        Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
         return convView;
     }
+    public  boolean isConnected() {
 
+        ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return  isConnected;
+    }
     public void updateDriverStatus(){
-        progressDialog=new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
 
-        JSONObject driverStatusObject = new JSONObject();
-        try {
-            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
-            DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-            driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
-            driverStatusObject.put("DriverID", driverProfile.DriverID);
-
-            Log.e("driverStatusObject: ", driverStatusObject + "");
-
-
-        }catch(JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverStatus, driverStatusObject, new Response.Listener<JSONObject>() {
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                progressDialog=new ProgressDialog(getActivity());
+                progressDialog.setCancelable(false);
+                progressDialog.setMessage("Loading...");
+                progressDialog.show();
+            }
 
             @Override
-            public void onResponse(JSONObject jobj) {
-                String response = jobj.toString();
-                Log.e("response continue: ", response + "");
-                ResponseMessage  responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                Log.e("Response: ",responseMessage.Response+"");
-                progressDialog.dismiss();
-                if(responseMessage.Response.equalsIgnoreCase("Success")) {
-                    SharedPreferences preferences = getActivity().getSharedPreferences("driver_status", getActivity().MODE_PRIVATE);
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putBoolean("driver_status", AppConstants.driverStatusBoolValue);
-                    editor.commit();
-                    Toast.makeText(getActivity(), "Driver Status is updated", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getActivity(), "Network error, please try again", Toast.LENGTH_SHORT).show();
+            protected Void doInBackground(Void... params) {
+
+                JSONObject driverStatusObject = new JSONObject();
+                try {
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+                    driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
+                    driverStatusObject.put("DriverID", driverProfile.DriverID);
+                    Log.e("driverStatusObject: ", driverStatusObject + "");
+                }catch(JSONException e) {
+                    e.printStackTrace();
                 }
+
+                Reader reader = API.callWebservicePost(AppConstants.DriverStatus, driverStatusObject.toString());
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                Log.e("responseMessage:",responseMessage.Response+"");
+                handlePostData();
+                return null;
+
             }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("error response: ",error+"");
-            }
-        });
-        MyApplication.getInstance().addToRequestQueue(req);
-
-
-
+        }.execute();
 
     }
     public void showDialog() {
@@ -161,17 +174,98 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         listDialog.show();
     }
 
+
+    public void handlePostData() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.dismiss();
+                SharedPreferences preferences = getActivity().getSharedPreferences("driver_status", getActivity().MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("driver_status", AppConstants.driverStatusBoolValue);
+                editor.commit();
+                Toast.makeText(getActivity(), "Driver Status is updated", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void selected(final String value) {
 
         txtUpdateTime.setText(value+" minutes");
-
         SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
         SharedPreferences.Editor editor=preferencesTimeInterval.edit();
         editor.putString("driver_time_interval",value);
         editor.commit();
+
+        try {
+            if (MyOrdersFragment.timer != null) {
+                MyOrdersFragment.timer.cancel();
+                Log.e("MyOrdersFragment.timer", "canceled");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+                try {
+                    SharedPreferences preferencesTimeIntervalUpdate = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+                    final String updatedTimeInterval=preferencesTimeIntervalUpdate.getString("driver_time_interval", "5");
+
+                    timer=new Timer();
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            updateDriverLocation();
+                        }
+                    },0,1000*60*Integer.parseInt(updatedTimeInterval));
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+
+
     }
 
+    public void updateDriverLocation() {
+
+        if (gpsTracker.canGetLocation()) {
+            updatedDriverLatitude=gpsTracker.latitude;
+            updatedDriverLongitude=gpsTracker.longitude;
+        }
+
+        Log.e("latitude main: ",updatedDriverLatitude+"");
+        Log.e("Longitude main: ",updatedDriverLongitude+"");
+
+
+        new AsyncTask<Void,Void,Void>(){
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                JSONObject driverCurrentLocation = new JSONObject();
+                try {
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+                    driverCurrentLocation.put("DriverID", driverProfile.DriverID);
+                    driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
+                    driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+                Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
+
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                Log.e("responseMessage:",responseMessage.Response+"");
+                return null;
+
+
+            }
+
+
+        }.execute();
+
+
+
+    }
 
 
 }

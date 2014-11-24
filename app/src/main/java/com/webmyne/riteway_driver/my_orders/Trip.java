@@ -2,9 +2,7 @@ package com.webmyne.riteway_driver.my_orders;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by dhruvil on 20-10-2014.
- */
+
 public class Trip {
 
     @SerializedName("TripID")

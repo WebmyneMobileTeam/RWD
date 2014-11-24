@@ -1,15 +1,15 @@
 package com.webmyne.riteway_driver.my_orders;
 
 import android.app.ProgressDialog;
-
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -19,34 +19,37 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
 import com.webmyne.riteway_driver.customViews.CallWebService;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
-import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
+import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
+import com.webmyne.riteway_driver.model.GPSTracker;
 import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.PagerSlidingTabStrip;
 import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
 import com.webmyne.riteway_driver.notifications.DriverNotification;
+import com.webmyne.riteway_driver.settings.SettingsFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.lang.reflect.Type;
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -61,13 +64,20 @@ public class MyOrdersFragment extends Fragment {
     private int badgeValue=0;
     private MyPagerAdapter adapter;
     ProgressDialog progressDialog;
-     ArrayList<Trip> tripArrayList;
-     ArrayList<DriverNotification> notificationList;
-
+    ArrayList<Trip> tripArrayList;
+    public static Timer timer;
+    ArrayList<DriverNotification> notificationList;
+//    private MapView mv;
+//    private MapController mc;
+    public boolean needUpdatedLocation=true;
+//    Location currentLocation;
     private String latituteValue;
     private String longitudeValue;
+    double updatedDriverLatitude;
+    double updatedDriverLongitude;
     private LocationManager locationManager;
     private String provider;
+    GPSTracker gpsTracker;
 
     public static MyOrdersFragment newInstance(String param1, String param2) {
         MyOrdersFragment fragment = new MyOrdersFragment();
@@ -81,6 +91,7 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+       gpsTracker = new GPSTracker(getActivity());
     }
 
     @Override
@@ -88,71 +99,106 @@ public class MyOrdersFragment extends Fragment {
         View convertView=inflater.inflate(R.layout.fragment_my_orders, container, false);
         tabs = (PagerSlidingTabStrip)convertView.findViewById(R.id.my_order_tabs);
         pager = (ViewPager) convertView.findViewById(R.id.pager);
+
+
+
         return convertView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        try {
+            if (SettingsFragment.timer != null) {
+                SettingsFragment.timer.cancel();
+                Log.e("SettingsFragment.timer", "canceled");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-//        try {
-//            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-//            final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
-//            Timer timer=new Timer();
-//            timer.scheduleAtFixedRate(new TimerTask() {
-//                @Override
-//                public void run() {
-//                    updateDriverLocation();
-//                }
-//            },0,1000*Integer.parseInt(updatedTimeInterval));
-//        }catch (NullPointerException e){
-//            e.printStackTrace();
-//        }
+        new CountDownTimer(3000, 1000) {
+            @Override
+            public void onFinish() {
 
-        getTripList();
+                try {
+            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+            final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
+
+                    timer=new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    updateDriverLocation();
+                }
+            },0,1000*60*Integer.parseInt(updatedTimeInterval));
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+            }
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
+        }.start();
+
+        if(isConnected()==true) {
+            getTripList();
+        } else {
+            Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+        }
         sharedPreferenceTrips=new SharedPreferenceTrips();
         sharedPreferenceNotification=new SharedPreferenceNotification();
     }
 
+    public  boolean isConnected() {
 
+        ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return  isConnected;
+    }
     public void updateDriverLocation() {
 
+        if (gpsTracker.canGetLocation()) {
+            updatedDriverLatitude=gpsTracker.latitude;
+            updatedDriverLongitude=gpsTracker.longitude;
+        }
 
-//        needUpdatedLocation=true;
-//        Log.e("latitude: ",updatedDriverLatitude+"");
-//        Log.e("Longitude",updatedDriverLongitude+"");
-//
-//        JSONObject driverCurrentLocation = new JSONObject();
-//        try {
-//
-//            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
-//            DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-//            driverCurrentLocation.put("DriverID", driverProfile.DriverID);
-//            driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
-//            driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
-//
-//        }catch(JSONException e) {
-//            e.printStackTrace();
-//        }
-//        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.DriverCurrentLocation, driverCurrentLocation, new Response.Listener<JSONObject>() {
-//
-//            @Override
-//            public void onResponse(JSONObject jobj) {
-//                String response = jobj.toString();
-//                Log.e("response after update driver location: ", response + "");
-//                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-//                Log.e("Response: ",responseMessage.Response+"");
-//
-//
-//            }
-//        }, new Response.ErrorListener() {
-//
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("error response: ",error+"");
-//            }
-//        });
-//        MyApplication.getInstance().addToRequestQueue(req);
+        Log.e("latitude main: ",updatedDriverLatitude+"");
+        Log.e("Longitude main: ",updatedDriverLongitude+"");
+
+
+        new AsyncTask<Void,Void,Void>(){
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                JSONObject driverCurrentLocation = new JSONObject();
+                try {
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+                    driverCurrentLocation.put("DriverID", driverProfile.DriverID);
+                    driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
+                    driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+                Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
+
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                Log.e("responseMessage:",responseMessage.Response+"");
+                return null;
+
+
+            }
+
+
+        }.execute();
+
+
 
     }
 
@@ -188,8 +234,11 @@ public class MyOrdersFragment extends Fragment {
                 final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
                 pager.setPageMargin(pageMargin);
                 tabs.setViewPager(pager);
-
-                getNotificationList();
+                if(isConnected()==true) {
+                    getNotificationList();
+                } else {
+                    Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -220,9 +269,9 @@ public class MyOrdersFragment extends Fragment {
                 sharedPreferenceNotification.clearNotification(getActivity());
                 for(int i=0;i<notificationList.size();i++){
 
-                            if(notificationList.get(i).notificationStatus.equalsIgnoreCase("false")){
-                                badgeValue=badgeValue+1;
-                            }
+                    if(notificationList.get(i).notificationStatus.equalsIgnoreCase("false")){
+                        badgeValue=badgeValue+1;
+                    }
                     sharedPreferenceNotification.saveNotification(getActivity(),notificationList.get(i));
                     Log.e("notification id: ",notificationList.get(i).notificationStatus+"");
                 }
@@ -276,4 +325,5 @@ public class MyOrdersFragment extends Fragment {
             return fragment;
         }
     }
+
 }

@@ -2,7 +2,10 @@ package com.webmyne.riteway_driver.receipt_and_feedback;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +31,7 @@ import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.customViews.ListDialog;
+import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.my_orders.MyOrdersFragment;
@@ -36,6 +40,7 @@ import com.webmyne.riteway_driver.my_orders.Trip;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -101,7 +106,11 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         txtTripComplete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                completTrip();
+                if(isConnected()) {
+                    completTrip();
+                } else {
+                    Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         txtPaymentType.setText("Cash");
@@ -113,6 +122,17 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         });
         return convertView;
     }
+
+    public  boolean isConnected() {
+
+        ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return  isConnected;
+    }
+
 
     @Override
     public void onResume() {
@@ -139,68 +159,67 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
 
     public void completTrip(){
 
-        progressDialog=new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
-
-        JSONObject driverStatusObject = new JSONObject();
-        try {
-            ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
-            Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
-            driverStatusObject.put("CustomerID", currentTrip.CustomerID+"");
-            driverStatusObject.put("CustomerComments", customerComments.getText().toString()+"");
-            driverStatusObject.put("CustomerRattings", customerRatting.getText().toString()+"");
-            driverStatusObject.put("PaymentType",txtPaymentType.getText().toString()+"" );
-            driverStatusObject.put("TripID", currentTrip.TripID+"");
-            driverStatusObject.put("TripStatus", AppConstants.tripSuccessStatus);
-            driverStatusObject.put("DropOffAddress", newDropoffAddress+"");
-            driverStatusObject.put("DropoffLatitude", newDropoffLatitude+"");
-            driverStatusObject.put("DropoffLongitude", newDropoffLongitude+"");
-            driverStatusObject.put("TripFare", currentTrip.TripFare+"");
-            driverStatusObject.put("isCustomerFeedbackGiven", true);
-            driverStatusObject.put("TripDistance", newDistance+"");
-
-            Log.e("driverStatusObject: ", driverStatusObject + "");
-        }catch(JSONException e) {
-            e.printStackTrace();
-        }
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.TripCompletion, driverStatusObject, new Response.Listener<JSONObject>() {
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                progressDialog=new ProgressDialog(getActivity());
+                progressDialog.setCancelable(false);
+                progressDialog.setMessage("Loading...");
+                progressDialog.show();
+            }
 
             @Override
-            public void onResponse(JSONObject jobj) {
-                String response = jobj.toString();
-                Log.e("response continue: ", response + "");
-                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                Log.e("Response: ",responseMessage.Response+"");
-                progressDialog.dismiss();
+            protected Void doInBackground(Void... params) {
 
-
-                    FragmentManager manager = getActivity().getSupportFragmentManager();
-                    Toast.makeText(getActivity(), "Trip completed Successfully", Toast.LENGTH_SHORT).show();
-                    FragmentTransaction ft = manager.beginTransaction();
-                    MyOrdersFragment myOrdersFragment = MyOrdersFragment.newInstance("", "");
-                    if (manager.findFragmentByTag("MY_ORDERS") == null) {
-                        ft.replace(R.id.main_content, myOrdersFragment,"MY_ORDERS").commit();
-                    }
-
+                JSONObject driverStatusObject = new JSONObject();
+                try {
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
+                    Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+                    driverStatusObject.put("CustomerID", currentTrip.CustomerID+"");
+                    driverStatusObject.put("CustomerComments", customerComments.getText().toString()+"");
+                    driverStatusObject.put("CustomerRattings", customerRatting.getText().toString()+"");
+                    driverStatusObject.put("PaymentType",txtPaymentType.getText().toString()+"" );
+                    driverStatusObject.put("TripID", currentTrip.TripID+"");
+                    driverStatusObject.put("TripStatus", AppConstants.tripSuccessStatus);
+                    driverStatusObject.put("DropOffAddress", newDropoffAddress+"");
+                    driverStatusObject.put("DropoffLatitude", newDropoffLatitude+"");
+                    driverStatusObject.put("DropoffLongitude", newDropoffLongitude+"");
+                    driverStatusObject.put("TripFare", currentTrip.TripFare+"");
+                    driverStatusObject.put("isCustomerFeedbackGiven", true);
+                    driverStatusObject.put("TripDistance", newDistance+"");
+                    Log.e("driverStatusObject: ", driverStatusObject + "");
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+                Reader reader = API.callWebservicePost(AppConstants.TripCompletion, driverStatusObject.toString());
+                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+                Log.e("responseMessage:",responseMessage.Response+"");
+                handlePostData();
+                return null;
 
 
             }
-        }, new Response.ErrorListener() {
 
+        }.execute();
+    }
+
+    public void handlePostData() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("error response: ",error+"");
+            public void run() {
+                progressDialog.dismiss();
+                FragmentManager manager = getActivity().getSupportFragmentManager();
+                Toast.makeText(getActivity(), "Trip completed Successfully", Toast.LENGTH_SHORT).show();
+                FragmentTransaction ft = manager.beginTransaction();
+                MyOrdersFragment myOrdersFragment = MyOrdersFragment.newInstance("", "");
+                if (manager.findFragmentByTag("MY_ORDERS") == null) {
+                    ft.replace(R.id.main_content, myOrdersFragment,"MY_ORDERS").commit();
+                }
             }
         });
-        MyApplication.getInstance().addToRequestQueue(req);
-
-
-
-
-
     }
+
 
     public void showDialog() {
 
