@@ -36,14 +36,16 @@ import javax.xml.datatype.Duration;
 
 public class CurrentOrdersFragment extends Fragment {
 
-    ListView currentOrdersListView;
-    CurrentOrdersAdapter currentOrdersAdapter;
-    ArrayList<Trip> currentOrdersList;
-    SharedPreferenceTrips sharedPreferenceTrips;
+    private ListView currentOrdersListView;
+    private CurrentOrdersAdapter currentOrdersAdapter;
+    private ArrayList<Trip> currentOrdersList;
+    private SharedPreferenceTrips sharedPreferenceTrips;
+
     public static CurrentOrdersFragment newInstance(String param1, String param2) {
         CurrentOrdersFragment fragment = new CurrentOrdersFragment();
         return fragment;
     }
+
     public CurrentOrdersFragment() {
         // Required empty public constructor
     }
@@ -60,8 +62,6 @@ public class CurrentOrdersFragment extends Fragment {
         // Inflate the layout for this fragment
         View convertView=inflater.inflate(R.layout.fragment_current_orders, container, false);
         currentOrdersListView=(ListView)convertView.findViewById(R.id.currentOrdersList);
-//        currentOrdersAdapter=new CurrentOrdersAdapter(getActivity(), currentOrdersList);
-//        currentOrdersListView.setAdapter(currentOrdersAdapter);
         return convertView;
     }
 
@@ -70,22 +70,26 @@ public class CurrentOrdersFragment extends Fragment {
     public void onResume() {
         super.onResume();
         try {
+
             SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
             String date=format.format(new Date());
 
             sharedPreferenceTrips = new SharedPreferenceTrips();
             currentOrdersList = sharedPreferenceTrips.loadTrip(getActivity());
+
             ArrayList<Trip> filteredCurruntOrderList=new ArrayList<Trip>();
             for(int i=0;i<currentOrdersList.size();i++){
                 if((!(currentOrdersList.get(i).TripStatus.contains(AppConstants.tripCancelledByDriverStatus) || currentOrdersList.get(i).TripStatus.contains(AppConstants.tripCancelledByCustomerStatus)) && date.equals(getFormatedDate(currentOrdersList.get(i))) )){
                     filteredCurruntOrderList.add(currentOrdersList.get(i));
                 }
             }
+
             if(currentOrdersList !=null) {
                 Collections.reverse(filteredCurruntOrderList);
                 currentOrdersAdapter = new CurrentOrdersAdapter(getActivity(), filteredCurruntOrderList);
                 currentOrdersListView.setAdapter(currentOrdersAdapter);
             }
+
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -127,6 +131,7 @@ public class CurrentOrdersFragment extends Fragment {
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_current_orders, parent, false);
                 holder = new ViewHolder();
+
                 holder.currentOrderCname=(TextView)convertView.findViewById(R.id.currentOrderCname);
                 holder.currentOrderDate=(TextView)convertView.findViewById(R.id.currentOrderDate);
                 holder.currentOrderPickupLocation=(TextView)convertView.findViewById(R.id.currentOrderPickupLocation);
@@ -139,17 +144,20 @@ public class CurrentOrdersFragment extends Fragment {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+
             holder.currentOrderCname.setText(currentOrdersList.get(position).CustomerName);
             holder.currentOrderDate.setText(getFormatedDate(currentOrdersList.get(position)));
             holder.currentOrderPickupLocation.setText("pickup: "+currentOrdersList.get(position).PickupAddress);
             holder.currentOrderDropoffLocation.setText("dropoff: "+currentOrdersList.get(position).DropOffAddress);
             holder.currentOrderFareAmount.setText(String.format("$ %.2f", getTotal(currentOrdersList.get(position)))+"");
             holder.orderHistoryStatus.setText("status: "+currentOrdersList.get(position).TripStatus);
+
             if(currentOrdersList.get(position).isCustomerFeedbackGiven.equalsIgnoreCase("false") && (!currentOrdersList.get(position).TripStatus.equalsIgnoreCase(AppConstants.tripInProgressStatus))){
                 holder. mapView.setVisibility(View.VISIBLE);
             } else {
                 holder. mapView.setVisibility(View.GONE);
             }
+
             holder. mapView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -166,6 +174,7 @@ public class CurrentOrdersFragment extends Fragment {
                     }
                 }
             });
+
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -178,8 +187,8 @@ public class CurrentOrdersFragment extends Fragment {
 
                 }
             });
-            return convertView;
 
+            return convertView;
 
         }
 
@@ -193,6 +202,7 @@ public class CurrentOrdersFragment extends Fragment {
         Date date = float2Date(dateinFloat);
         return  format.format(date);
     }
+
     public  java.util.Date float2Date(float nbSeconds) {
         java.util.Date date_origine;
         java.util.Calendar date = java.util.Calendar.getInstance();
@@ -203,6 +213,7 @@ public class CurrentOrdersFragment extends Fragment {
         date.add(java.util.Calendar.SECOND, (int) nbSeconds);
         return date.getTime();
     }
+
     public double getTotal(Trip currentTrip) {
         Double total;
         String tripFareValue=String.format("%.2f", Double.parseDouble(currentTrip.TripDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));

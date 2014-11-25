@@ -48,19 +48,18 @@ import java.util.Date;
 
 public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.setSelectedListner{
 
-    TextView txtPaymentType,txtTripComplete,customerRatting,
+    private TextView txtPaymentType,txtTripComplete,customerRatting,
             txtTripCustomerName,txtTripPickupAddress,txtTripDropoffAddress,
             txtTripDistance,txtTripDate,txtTripFare,txtTripTip,txtTripFee,txtTotalAmount;
-    EditText customerComments;
-    RatingBar rattings;
-
-    String newFare,newDropoffAddress,newDropoffLatitude,newDropoffLongitude,newDistance;
-    Trip currentTrip;
-    ArrayList<String> dateSelectionArray=new ArrayList<String>();
+    private EditText customerComments;
+    private RatingBar rattings;
+    private String newFare,newDropoffAddress,newDropoffLatitude,newDropoffLongitude,newDistance;
+    private Trip currentTrip;
+    private ArrayList<String> dateSelectionArray=new ArrayList<String>();
     private ProgressDialog progressDialog;
+
     public static ReceiptAndFeedbackFragment newInstance(String param1, String param2) {
         ReceiptAndFeedbackFragment fragment = new ReceiptAndFeedbackFragment();
-
         return fragment;
     }
 
@@ -81,6 +80,13 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         // Inflate the layout for this fragment
         View convertView= inflater.inflate(R.layout.fragment_receipt_and_feedback, container, false);
 
+        initView(convertView);
+
+        return convertView;
+    }
+
+    private void initView(View convertView){
+
         txtTripCustomerName=(TextView)convertView.findViewById(R.id.txtTripCustomerName);
         txtTripPickupAddress=(TextView)convertView.findViewById(R.id.txtTripPickupAddress);
         txtTripDropoffAddress=(TextView)convertView.findViewById(R.id.txtTripDropoffAddress);
@@ -92,6 +98,12 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         txtTotalAmount=(TextView)convertView.findViewById(R.id.txtTotalAmount);
         customerRatting=(TextView)convertView.findViewById(R.id.txtCustomerRatting);
         rattings=(RatingBar)convertView.findViewById(R.id.rattings);
+        txtPaymentType=(TextView)convertView.findViewById(R.id.txtPaymentType);
+        txtTripComplete=(TextView)convertView.findViewById(R.id.txtTripComplete);
+        customerComments=(EditText)convertView.findViewById(R.id.txtCustomerComments);
+
+        txtPaymentType.setText("Cash");
+
         rattings.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -99,10 +111,6 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
             }
         });
 
-        txtPaymentType=(TextView)convertView.findViewById(R.id.txtPaymentType);
-        txtTripComplete=(TextView)convertView.findViewById(R.id.txtTripComplete);
-
-        customerComments=(EditText)convertView.findViewById(R.id.txtCustomerComments);
         txtTripComplete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,34 +121,34 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
                 }
             }
         });
-        txtPaymentType.setText("Cash");
+
+
         txtPaymentType.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDialog();
             }
         });
-        return convertView;
+
     }
 
     public  boolean isConnected() {
 
         ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
         return  isConnected;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences preferences = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
-        newFare=preferences.getString("fare", "");
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
         currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+
+        SharedPreferences preferences = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
+        newFare=preferences.getString("fare", "");
         newDropoffAddress=preferences.getString("dropoff_address", "");
         newDropoffLatitude=preferences.getString("dropoff_latitude", "");
         newDropoffLongitude=preferences.getString("dropoff_longitude", "");
@@ -155,6 +163,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         txtTripTip.setText(currentTrip.TipPercentage+" %");
         txtTripFee.setText("$ "+currentTrip.TripFee+"");
         txtTotalAmount.setText(String.format("$ %.2f", getTotal(currentTrip))+"");
+
     }
 
     public void completTrip(){
@@ -192,13 +201,12 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
+
                 Reader reader = API.callWebservicePost(AppConstants.TripCompletion, driverStatusObject.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
                 Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
                 return null;
-
-
             }
 
         }.execute();
@@ -246,6 +254,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         Date date = float2Date(dateinFloat);
         return  format.format(date);
     }
+
     public  java.util.Date float2Date(float nbSeconds) {
         java.util.Date date_origine;
         java.util.Calendar date = java.util.Calendar.getInstance();
@@ -256,6 +265,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         date.add(java.util.Calendar.SECOND, (int) nbSeconds);
         return date.getTime();
     }
+
     public double getTotal(Trip currentTrip) {
         Double total;
 //        String tripFareValue=String.format("%.2f", Double.parseDouble(newDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));
@@ -269,6 +279,5 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         total=total+Double.parseDouble(currentTrip.TripFee);
         return total;
     }
-
 
 }

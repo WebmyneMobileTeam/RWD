@@ -18,18 +18,19 @@ public class MyProfileFragment extends Fragment {
         MyProfileFragment fragment = new MyProfileFragment();
         return fragment;
     }
+
     public MyProfileFragment() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         View rootView=inflater.inflate(R.layout.fragment_my_profile, container, false);

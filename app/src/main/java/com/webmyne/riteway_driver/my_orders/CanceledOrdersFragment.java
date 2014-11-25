@@ -27,13 +27,15 @@ import java.util.Collections;
 import java.util.Date;
 
 public class CanceledOrdersFragment extends Fragment implements ListDialog.setSelectedListner{
-    ListView ordersCanceledListView;
-    OrdersCanceledAdapter ordersCanceledAdapter;
-    ArrayList<Trip> filteredOrderList;
-    ArrayList<Trip> ordersCanceledList;
-    TextView txtDateSelectionForOrderCancel;
-    ArrayList<String> dateSelectionArray=new ArrayList<String>();
-    SharedPreferenceTrips sharedPreferenceTrips;
+
+    private ListView ordersCanceledListView;
+    private OrdersCanceledAdapter ordersCanceledAdapter;
+    private ArrayList<Trip> filteredOrderList;
+    private ArrayList<Trip> ordersCanceledList;
+    private TextView txtDateSelectionForOrderCancel;
+    private ArrayList<String> dateSelectionArray=new ArrayList<String>();
+    private SharedPreferenceTrips sharedPreferenceTrips;
+
     public static CanceledOrdersFragment newInstance(String param1, String param2) {
         CanceledOrdersFragment fragment = new CanceledOrdersFragment();
 
@@ -47,8 +49,6 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         dateSelectionArray.add("Current Week");
         dateSelectionArray.add("Last Week");
         dateSelectionArray.add("Current Month");
@@ -68,8 +68,6 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
             }
         });
         ordersCanceledListView =(ListView)convertView.findViewById(R.id.canceledOrdersList);
-//        ordersCanceledAdapter =new OrdersCanceledAdapter(getActivity(), ordersCanceledList);
-//        ordersCanceledListView.setAdapter(ordersCanceledAdapter);
         return  convertView;
     }
 
@@ -81,7 +79,6 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
 
             sharedPreferenceTrips=new SharedPreferenceTrips();
             ordersCanceledList=sharedPreferenceTrips.loadTrip(getActivity());
-
             filteredOrderList=new ArrayList<Trip>();
             filterData("Current Week");
             if(ordersCanceledList !=null) {
@@ -131,22 +128,26 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_canceled_orders, parent, false);
                 holder = new ViewHolder();
+
                 holder.orderHistoryCname=(TextView)convertView.findViewById(R.id.orderCanceledCname);
                 holder.orderHistoryDate=(TextView)convertView.findViewById(R.id.orderCanceledDate);
                 holder.orderHistoryPickupLocation=(TextView)convertView.findViewById(R.id.orderCanceledPickupLocation);
                 holder.orderHistoryDropoffLocation=(TextView)convertView.findViewById(R.id.orderCanceledDropoffLocation);
                 holder.orderHistoryStatus=(TextView)convertView.findViewById(R.id.orderCanceledStatus);
                 holder. canceledOrdersFareAmount=(TextView)convertView.findViewById(R.id.currentOrderFareAmount);
+
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+
             holder.orderHistoryCname.setText(currentOrdersList.get(position).CustomerName);
             holder.orderHistoryDate.setText(getFormatedDate(currentOrdersList.get(position)));
             holder.orderHistoryPickupLocation.setText("pickup: "+currentOrdersList.get(position).PickupAddress);
             holder.orderHistoryDropoffLocation.setText("dropoff: "+currentOrdersList.get(position).DropOffAddress);
             holder.orderHistoryStatus.setText("status: "+currentOrdersList.get(position).TripStatus);
             holder.canceledOrdersFareAmount.setText(String.format("$ %.2f", getTotal(currentOrdersList.get(position)))+"");
+
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -160,12 +161,7 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
                 }
             });
             return convertView;
-
-
         }
-
-
-
     }
 
     public String getFormatedDate(Trip currentTrip) {
@@ -175,6 +171,7 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
         Date date = float2Date(dateinFloat);
         return  format.format(date);
     }
+
     public  java.util.Date float2Date(float nbSeconds) {
         java.util.Date date_origine;
         java.util.Calendar date = java.util.Calendar.getInstance();
@@ -185,6 +182,7 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
         date.add(java.util.Calendar.SECOND, (int) nbSeconds);
         return date.getTime();
     }
+
     public double getTotal(Trip currentTrip) {
         Double total;
         String tripFareValue=String.format("%.2f", Double.parseDouble(currentTrip.TripDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));
@@ -198,7 +196,6 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
         total=total+Double.parseDouble(currentTrip.TripFee);
         return total;
     }
-
 
     public void showDialog() {
 
@@ -290,9 +287,11 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
                     }
                 }
             }
+
             if(ordersCanceledAdapter != null) {
                 ordersCanceledAdapter.notifyDataSetChanged();
             }
+
         } catch (Exception e){
             e.printStackTrace();
         }

@@ -46,11 +46,11 @@ public class OrderDetailActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_detail);
+
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
+            getFragmentManager().beginTransaction().add(R.id.container, new PlaceholderFragment()).commit();
         }
+
         txtHeader.setText("TRIP DETAILS");
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -62,8 +62,7 @@ public class OrderDetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.order_detail, menu);
+
         return true;
     }
 
@@ -89,12 +88,13 @@ public class OrderDetailActivity extends BaseActivity {
     public static class PlaceholderFragment extends android.app.Fragment {
 
 
-        ProgressDialog progressDialog;
-        Trip currentTrip;
-        TextView currentTripDriverName, currentTripPickup, currentTripDropoff, currentTripPickupNote, currentTripDate, currentTripTime,
+        private ProgressDialog progressDialog;
+        private Trip currentTrip;
+        private TextView currentTripDriverName, currentTripPickup, currentTripDropoff, currentTripPickupNote, currentTripDate, currentTripTime,
                 currentTripDistance, txtTripStatus, currentTripPaymentType, currentTripFare, currentTripTip, currentTripFee,txtTotalAmount,
                 txtCancelTrip,txtAcceptTrip,currentTripMobile,currentTripEmail,txtpaymentType;
-        LinearLayout bottomButtonSelection;
+        private LinearLayout bottomButtonSelection;
+
         public PlaceholderFragment() {
         }
 
@@ -104,14 +104,38 @@ public class OrderDetailActivity extends BaseActivity {
 
         }
 
-
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_order_detail, container, false);
+
+            initView(rootView);
+
+            return rootView;
+        }
+
+        private void initView(View rootView){
+
             txtCancelTrip=(TextView)rootView.findViewById(R.id.txtCancelTrip);
             txtAcceptTrip=(TextView)rootView.findViewById(R.id.txtAcceptTrip);
+            bottomButtonSelection=(LinearLayout)rootView.findViewById(R.id.bottomButtonSelection);
+            currentTripMobile=(TextView)rootView.findViewById(R.id.currentTripMobile);
+            currentTripEmail=(TextView)rootView.findViewById(R.id.currentTripEmail);
+            currentTripDriverName=(TextView)rootView.findViewById(R.id.currentTripCustomerName);
+            currentTripPickup=(TextView)rootView.findViewById(R.id.currentTripPickup);
+            currentTripDropoff=(TextView)rootView.findViewById(R.id.currentTripDropoff);
+            currentTripPickupNote=(TextView)rootView.findViewById(R.id.currentTripPickupNote);
+            currentTripDate=(TextView)rootView.findViewById(R.id.currentTripDate);
+            currentTripTime=(TextView)rootView.findViewById(R.id.currentTripTime);
+            currentTripDistance=(TextView)rootView.findViewById(R.id.currentTripDistance);
+            txtTripStatus=(TextView)rootView.findViewById(R.id.txtTripStatus);
+            currentTripFare=(TextView)rootView.findViewById(R.id.currentTripFare);
+            currentTripTip=(TextView)rootView.findViewById(R.id.currentTripTip);
+            currentTripFee=(TextView)rootView.findViewById(R.id.currentTripFee);
+            txtTotalAmount=(TextView)rootView.findViewById(R.id.txtTotalAmount);
+            currentTripPaymentType=(TextView)rootView.findViewById(R.id.currentTripPaymentType);
+            txtpaymentType=(TextView)rootView.findViewById(R.id.txtpaymentType);
+
             txtCancelTrip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -133,42 +157,24 @@ public class OrderDetailActivity extends BaseActivity {
                     }
                 }
             });
-            bottomButtonSelection=(LinearLayout)rootView.findViewById(R.id.bottomButtonSelection);
-            currentTripMobile=(TextView)rootView.findViewById(R.id.currentTripMobile);
-            currentTripEmail=(TextView)rootView.findViewById(R.id.currentTripEmail);
-            currentTripDriverName=(TextView)rootView.findViewById(R.id.currentTripCustomerName);
-            currentTripPickup=(TextView)rootView.findViewById(R.id.currentTripPickup);
-            currentTripDropoff=(TextView)rootView.findViewById(R.id.currentTripDropoff);
-            currentTripPickupNote=(TextView)rootView.findViewById(R.id.currentTripPickupNote);
-            currentTripDate=(TextView)rootView.findViewById(R.id.currentTripDate);
-            currentTripTime=(TextView)rootView.findViewById(R.id.currentTripTime);
-            currentTripDistance=(TextView)rootView.findViewById(R.id.currentTripDistance);
-            txtTripStatus=(TextView)rootView.findViewById(R.id.txtTripStatus);
-            currentTripFare=(TextView)rootView.findViewById(R.id.currentTripFare);
-            currentTripTip=(TextView)rootView.findViewById(R.id.currentTripTip);
-            currentTripFee=(TextView)rootView.findViewById(R.id.currentTripFee);
-            txtTotalAmount=(TextView)rootView.findViewById(R.id.txtTotalAmount);
-
-            currentTripPaymentType=(TextView)rootView.findViewById(R.id.currentTripPaymentType);
-            txtpaymentType=(TextView)rootView.findViewById(R.id.txtpaymentType);
-
-            return rootView;
         }
 
         public  boolean isConnected() {
 
             ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             boolean isConnected = activeNetwork != null &&
                     activeNetwork.isConnectedOrConnecting();
             return  isConnected;
         }
+
         @Override
         public void onResume() {
             super.onResume();
+
             ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
             currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+
             currentTripMobile.setText(currentTrip.CustomerMobile);
             currentTripEmail.setText(currentTrip.CustomerEmail);
             currentTripDriverName.setText(currentTrip.CustomerName);
@@ -193,11 +199,13 @@ public class OrderDetailActivity extends BaseActivity {
             currentTripFee.setText("$ "+currentTrip.TripFee);
             txtTotalAmount.setText(String.format("$ %.2f", getTotal(currentTrip))+"");
             txtTripStatus.setText(currentTrip.TripStatus);
+
             if(currentTrip.TripStatus.contains(AppConstants.tripInProgressStatus) ){
                 bottomButtonSelection.setVisibility(View.VISIBLE);
             } else {
                 bottomButtonSelection.setVisibility(View.GONE);
             }
+
         }
 
         public String getFormatedDate() {
@@ -207,6 +215,7 @@ public class OrderDetailActivity extends BaseActivity {
             Date date = float2Date(dateinFloat);
             return  format.format(date);
         }
+
         public static java.util.Date float2Date(float nbSeconds) {
             java.util.Date date_origine;
             java.util.Calendar date = java.util.Calendar.getInstance();

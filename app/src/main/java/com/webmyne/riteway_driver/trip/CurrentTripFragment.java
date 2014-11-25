@@ -4,18 +4,15 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -48,7 +44,6 @@ import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.my_orders.Trip;
-import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackActivity;
 import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackFragment;
 
 import org.json.JSONException;
@@ -65,27 +60,27 @@ public class CurrentTripFragment extends Fragment  {
 
     private MapView mv;
     private MapController mc;
-    TextView txtArrivedOnSite;
+    private TextView txtCommonButton;
     private ProgressDialog progressDialog;
     public boolean needUpdatedLocation=true;
-    Location currentLocation;
-    double updatedDriverLatitude;
-    double updatedDriverLongitude;
-    LatLng pickup_latlng;
-    LatLng dropoff_latlng;
-
-    Location pickupLocation;
-    Location dropoffLocation;
-    Trip currentTrip;
-
+    private Location currentLocation;
+    private double updatedDriverLatitude;
+    private double updatedDriverLongitude;
+    private LatLng pickup_latlng;
+    private LatLng dropoff_latlng;
+    private Location pickupLocation;
+    private Location dropoffLocation;
+    private Trip currentTrip;
 
     public static CurrentTripFragment newInstance(String param1, String param2) {
         CurrentTripFragment fragment = new CurrentTripFragment();
         return fragment;
     }
+
     public CurrentTripFragment() {
         // Required empty public constructor
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,13 +92,15 @@ public class CurrentTripFragment extends Fragment  {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView=inflater.inflate(R.layout.fragment_current_trip, container, false);
-        txtArrivedOnSite=(TextView)rootView.findViewById(R.id.txtArrivedOnSite);
-        txtArrivedOnSite.setVisibility(View.GONE);
-        txtArrivedOnSite.setOnClickListener(new View.OnClickListener() {
+
+        txtCommonButton =(TextView)rootView.findViewById(R.id.txtArrivedOnSite);
+        txtCommonButton.setVisibility(View.GONE);
+        txtCommonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(txtArrivedOnSite.getText().equals("ARRIVED ON SITE")){
+                if (txtCommonButton.getText().equals("ARRIVED ON SITE")) {
+
                     AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                     alert.setTitle("Arived On Site Alert");
                     alert.setMessage("Send notification to customer about you reached at pickup location");
@@ -111,7 +108,7 @@ public class CurrentTripFragment extends Fragment  {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if(isConnected()==true) {
+                            if (isConnected() == true) {
                                 updateArrivedOnSiteStatus();
                             } else {
                                 Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
@@ -119,30 +116,30 @@ public class CurrentTripFragment extends Fragment  {
                             dialog.dismiss();
                         }
                     });
-                   alert.show();
-                } else if(txtArrivedOnSite.getText().equals("START TRIP")) {
+
+                    alert.show();
+
+                } else if (txtCommonButton.getText().equals("START TRIP")) {
 
                     updateStartTripStatus(AppConstants.tripOnTripStatus);
+                    txtCommonButton.setVisibility(View.INVISIBLE);
 
-                    // change map
-//                    txtArrivedOnSite.setText("STOP TRIP");
-                    txtArrivedOnSite.setVisibility(View.INVISIBLE);
-                } else if(txtArrivedOnSite.getText().equals("STOP TRIP")) {
+                } else if (txtCommonButton.getText().equals("STOP TRIP")) {
+
                     try {
-                        String address=  getAddressValue(currentLocation);
+                        String address = getAddressValue(currentLocation);
+                        SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination", getActivity().MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferencesTimeInterval.edit();
+                        editor.putString("fare", String.format("%.2f", (pickupLocation.distanceTo(currentLocation) / 1000) * 0.6214 * Double.parseDouble(currentTrip.TripFare)) + "");
+                        editor.putString("dropoff_address", address + "");
+                        editor.putString("dropoff_latitude", currentLocation.getLatitude() + "");
+                        editor.putString("dropoff_longitude", currentLocation.getLongitude() + "");
+                        editor.putString("distance", (String.format("%.2f", pickupLocation.distanceTo(currentLocation) / 1000)) + "");
+                        editor.commit();
 
-                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("updated_fare_and_destination",getActivity().MODE_PRIVATE);
-                    SharedPreferences.Editor editor=preferencesTimeInterval.edit();
-                    editor.putString("fare",String.format("%.2f", (pickupLocation.distanceTo(currentLocation)/1000)*0.6214*Double.parseDouble(currentTrip.TripFare))+"");
-                    editor.putString("dropoff_address",address+"");
-                    editor.putString("dropoff_latitude",currentLocation.getLatitude()+"");
-                    editor.putString("dropoff_longitude",currentLocation.getLongitude()+"");
-                    editor.putString("distance",(String.format("%.2f",pickupLocation.distanceTo(currentLocation)/1000)) +"");
-                    editor.commit();
+                        updateStopTripStatus(AppConstants.tripStopStatus);
 
-                    updateStopTripStatus(AppConstants.tripStopStatus);
-
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -151,7 +148,7 @@ public class CurrentTripFragment extends Fragment  {
 
         mv = (MapView)rootView.findViewById(R.id.map);
 
-            setView(savedInstanceState);
+        setView(savedInstanceState);
 
         return rootView;
     }
@@ -163,148 +160,167 @@ public class CurrentTripFragment extends Fragment  {
         super.onResume();
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
         currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+
         mv.onResume();
 
-        if(currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripStopStatus)) {
-            txtArrivedOnSite.setText("STOP TRIP");
-            txtArrivedOnSite.setVisibility(View.VISIBLE);
+        // Update common button's text value according Trip Status
+        updateCommonButtonText();
 
+        // Display show pickup and dropoff location on map
+        showTripPath();
+
+        // track current location
+        trackCurrentLocation();
+
+        // update driver's location after every 15 seconds
+        new CountDownTimer(3000, 1000) {
+            @Override
+            public void onFinish() {
+
+                try {
+
+                    Timer timer = new Timer();
+                    // stopLoginTimer();
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+
+                            updateDriverLocation();
+
+                        }
+                    }, 0, 1000 * 15);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
+        }.start();
+
+    }
+
+
+    private void updateCommonButtonText() {
+
+        if(currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripStopStatus)) {
+            txtCommonButton.setText("STOP TRIP");
+            txtCommonButton.setVisibility(View.VISIBLE);
         }
 
-            if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripArrivedOnSiteStatus)) {
-                txtArrivedOnSite.setText("START TRIP");
-                txtArrivedOnSite.setVisibility(View.VISIBLE);
-            }
+        if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripArrivedOnSiteStatus)) {
+            txtCommonButton.setText("START TRIP");
+            txtCommonButton.setVisibility(View.VISIBLE);
+        }
 
-            if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripOnTripStatus)) {
-                txtArrivedOnSite.setText("START TRIP");
-                txtArrivedOnSite.setVisibility(View.INVISIBLE);
-            }
-            pickup_latlng = new LatLng(Double.parseDouble(currentTrip.PickupLatitude), Double.parseDouble(currentTrip.PickupLongitude));
-            dropoff_latlng = new LatLng(Double.parseDouble(currentTrip.DropoffLatitude), Double.parseDouble(currentTrip.DropoffLongitude));
+        if (currentTrip.TripStatus.equalsIgnoreCase(AppConstants.tripOnTripStatus)) {
+            txtCommonButton.setText("START TRIP");
+            txtCommonButton.setVisibility(View.INVISIBLE);
+        }
 
-            if (pickup_latlng != null) {
-                MarkerOptions opts = new MarkerOptions();
-                opts.position(pickup_latlng);
-                opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pickup_pin));
-                opts.title("PICK ME UP HERE");
-                opts.snippet("");
-                addMarker(opts);
-            }
+    }
 
-            if (dropoff_latlng != null) {
-                MarkerOptions opts = new MarkerOptions();
-                opts.position(dropoff_latlng);
-                opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dropoff_pin));
-                opts.title("DROP ME HERE");
-                opts.snippet("");
-                addMarker(opts);
-            }
+    private void showTripPath() {
 
-            Navigator nav = new Navigator(mv.getMap(), pickup_latlng, dropoff_latlng);
-            nav.findDirections(false);
-            nav.setPathColor(Color.parseColor("#4285F4"), Color.BLUE, Color.BLUE);
+        pickup_latlng = new LatLng(Double.parseDouble(currentTrip.PickupLatitude), Double.parseDouble(currentTrip.PickupLongitude));
+        dropoff_latlng = new LatLng(Double.parseDouble(currentTrip.DropoffLatitude), Double.parseDouble(currentTrip.DropoffLongitude));
 
-            pickupLocation = new Location("");
-            pickupLocation.setLatitude(pickup_latlng.latitude);
-            pickupLocation.setLongitude(pickup_latlng.longitude);
+        if (pickup_latlng != null) {
+            MarkerOptions opts = new MarkerOptions();
+            opts.position(pickup_latlng);
+            opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_pickup_pin));
+            opts.title("PICK ME UP HERE");
+            opts.snippet("");
+            addMarker(opts);
+        }
 
-            dropoffLocation = new Location("");
-            dropoffLocation.setLatitude(dropoff_latlng.latitude);
-            dropoffLocation.setLongitude(dropoff_latlng.longitude);
+        if (dropoff_latlng != null) {
+            MarkerOptions opts = new MarkerOptions();
+            opts.position(dropoff_latlng);
+            opts.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_dropoff_pin));
+            opts.title("DROP ME HERE");
+            opts.snippet("");
+            addMarker(opts);
+        }
 
-            mc.startTrackMyLocation(mc.getMap(), 2000, 0, MapController.TrackType.TRACK_TYPE_NONE, new MapController.ChangeMyLocation() {
-                @Override
-                public void changed(GoogleMap map, Location location, boolean lastLocation) {
-                    currentLocation = location;
+        Navigator nav = new Navigator(mv.getMap(), pickup_latlng, dropoff_latlng);
+        nav.findDirections(false);
+        nav.setPathColor(Color.parseColor("#4285F4"), Color.BLUE, Color.BLUE);
 
-                    try {
-                        int zoom = (int) (mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel() * 2.5));
-                            mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
+    }
 
-                    float pickupDistance = location.distanceTo(pickupLocation);
-                    if (pickupDistance < 200) {
-                        if (!txtArrivedOnSite.isShown()) {
+    private void trackCurrentLocation() {
 
-                            if (!txtArrivedOnSite.getText().toString().equals("START TRIP") ) {
-                                Toast.makeText(getActivity(), "arrived on site", Toast.LENGTH_SHORT).show();
-                                txtArrivedOnSite.setVisibility(View.VISIBLE);
-                            }
+        pickupLocation = new Location("");
+        pickupLocation.setLatitude(pickup_latlng.latitude);
+        pickupLocation.setLongitude(pickup_latlng.longitude);
+
+        dropoffLocation = new Location("");
+        dropoffLocation.setLatitude(dropoff_latlng.latitude);
+        dropoffLocation.setLongitude(dropoff_latlng.longitude);
+
+        mc.startTrackMyLocation(mc.getMap(), 2000, 0, MapController.TrackType.TRACK_TYPE_NONE, new MapController.ChangeMyLocation() {
+            @Override
+            public void changed(GoogleMap map, Location location, boolean lastLocation) {
+
+                currentLocation = location;
+
+                try {
+                    int zoom = (int) (mc.getMap().getMaxZoomLevel() - (mc.getMap().getMinZoomLevel() * 2.5));
+                    mc.animateTo(mc.getMyLocation().getLatitude(), mc.getMyLocation().getLongitude(), zoom);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+
+                // when driver reached at pickup location
+                float pickupDistance = location.distanceTo(pickupLocation);
+                if (pickupDistance < 200) {
+                    if (!txtCommonButton.isShown()) {
+
+                        if (!txtCommonButton.getText().toString().equals("START TRIP") ) {
+                            Toast.makeText(getActivity(), "arrived on site", Toast.LENGTH_SHORT).show();
+                            txtCommonButton.setVisibility(View.VISIBLE);
                         }
-
                     }
 
-                    float dropOffDistance = location.distanceTo(dropoffLocation);
-                    if (dropOffDistance < 200) {
-                        if (txtArrivedOnSite.getText().toString().equals("START TRIP")) {
-                            txtArrivedOnSite.setText("STOP TRIP");
-                            Toast.makeText(getActivity(), "arrived on destination", Toast.LENGTH_SHORT).show();
-                            txtArrivedOnSite.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    if (needUpdatedLocation == true) {
-                        updatedDriverLatitude = location.getLatitude();
-                        updatedDriverLongitude = location.getLongitude();
-                        needUpdatedLocation = false;
-                    }
                 }
-            });
 
-
-
-            new CountDownTimer(3000, 1000) {
-                @Override
-                public void onFinish() {
-
-                    try {
-
-                        Timer timer = new Timer();
-                        // stopLoginTimer();
-                        timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-
-                                    updateDriverLocation();
-
-                            }
-                        }, 0, 1000 * 15);
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
+                // when driver reached at dropoff location
+                float dropOffDistance = location.distanceTo(dropoffLocation);
+                if (dropOffDistance < 200) {
+                    if (txtCommonButton.getText().toString().equals("START TRIP")) {
+                        txtCommonButton.setText("STOP TRIP");
+                        Toast.makeText(getActivity(), "arrived on destination", Toast.LENGTH_SHORT).show();
+                        txtCommonButton.setVisibility(View.VISIBLE);
                     }
                 }
 
-                @Override
-                public void onTick(long millisUntilFinished) {
+                // get updated latitude and longitude value
+                if (needUpdatedLocation == true) {
+                    updatedDriverLatitude = location.getLatitude();
+                    updatedDriverLongitude = location.getLongitude();
+                    needUpdatedLocation = false;
                 }
-            }.start();
-
-
-
-
+            }
+        });
     }
 
     public  boolean isConnected() {
 
         ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return  isConnected;
     }
 
     public String getAddressValue(Location currentLocation) {
         StringBuilder result = new StringBuilder();
         try {
+
             Geocoder geocoder;
             List<Address> addresses;
             geocoder = new Geocoder(getActivity(), Locale.getDefault());
             addresses = geocoder.getFromLocation(currentLocation.getLatitude(), currentLocation.getLongitude(), 1);
-
             Address address = addresses.get(0);
             String locality = address.getLocality();
             String city = address.getCountryName();
@@ -326,7 +342,6 @@ public class CurrentTripFragment extends Fragment  {
                 result.append(locality + " ");
             }
 
-
             if (city != null) {
                 result.append(city + " " + region_code + " ");
             }
@@ -338,13 +353,13 @@ public class CurrentTripFragment extends Fragment  {
         }catch (Exception e) {
             e.printStackTrace();
         }
+
         return result.toString();
     }
 
     private void setView(Bundle savedInstanceState) {
         mv.onCreate(savedInstanceState);
         mc = new MapController(mv.getMap());
-//        mc.whenMapClick(this);
     }
 
     public void updateArrivedOnSiteStatus(){
@@ -366,11 +381,13 @@ public class CurrentTripFragment extends Fragment  {
                 try {
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
                     Trip currentTrip=complexPreferences.getObject("current_trip_details", Trip.class);
+
                     driverStatusObject.put("CustomerID", currentTrip.CustomerID);
                     driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
                     driverStatusObject.put("TripID", currentTrip.TripID);
                     driverStatusObject.put("TripStatus", AppConstants.tripArrivedOnSiteStatus);
                     Log.e("driverStatusObject: ", driverStatusObject + "");
+
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
@@ -379,23 +396,26 @@ public class CurrentTripFragment extends Fragment  {
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
                 Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
+
                 return null;
             }
 
 
         }.execute();
     }
+
     public void handlePostData() {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 progressDialog.dismiss();
-                txtArrivedOnSite.setText("START TRIP");
+                txtCommonButton.setText("START TRIP");
             }
         });
     }
 
     public void updateStartTripStatus(final String status) {
+
         progressDialog=new ProgressDialog(getActivity());
         progressDialog.setCancelable(true);
         progressDialog.setMessage("Loading...");
@@ -411,10 +431,10 @@ public class CurrentTripFragment extends Fragment  {
             tripObject.put("TripStatus", status);
             Log.e("tripObject: ", tripObject + "");
 
-
         }catch(JSONException e) {
             e.printStackTrace();
         }
+
         JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
 
             @Override
@@ -425,6 +445,7 @@ public class CurrentTripFragment extends Fragment  {
                 Log.e("after start trip response: ", responseMessage.Response +"");
 
                 progressDialog.dismiss();
+
                 if(responseMessage.Response.equalsIgnoreCase("Success")) {
                     Toast.makeText(getActivity(), "Trip Started Successfully", Toast.LENGTH_SHORT).show();
                 } else {
@@ -445,6 +466,7 @@ public class CurrentTripFragment extends Fragment  {
 
 
     public void updateStopTripStatus(final String status) {
+
         progressDialog=new ProgressDialog(getActivity());
         progressDialog.setCancelable(true);
         progressDialog.setMessage("Loading...");
@@ -464,6 +486,7 @@ public class CurrentTripFragment extends Fragment  {
         }catch(JSONException e) {
             e.printStackTrace();
         }
+
         JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, AppConstants.RequestedTripStatus, tripObject, new Response.Listener<JSONObject>() {
 
             @Override
@@ -474,6 +497,7 @@ public class CurrentTripFragment extends Fragment  {
                 Log.e("after stop trip response: ", responseMessage.Response +"");
 
                 progressDialog.dismiss();
+
                 if(responseMessage.Response.equalsIgnoreCase("Success")) {
 //                    Toast.makeText(getActivity(), "Trip Stop Successfully", Toast.LENGTH_SHORT).show();
                     FragmentManager manager = getActivity().getSupportFragmentManager();
@@ -500,9 +524,6 @@ public class CurrentTripFragment extends Fragment  {
 
     }
 
-
-
-
     private void addMarker(MarkerOptions opts) {
 
         mc.addMarker(opts, new MapController.MarkerCallback() {
@@ -519,7 +540,6 @@ public class CurrentTripFragment extends Fragment  {
         Log.e("latitude: ",updatedDriverLatitude+"");
         Log.e("Longitude",updatedDriverLongitude+"");
 
-
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -529,9 +549,11 @@ public class CurrentTripFragment extends Fragment  {
 
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
                     DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+
                     driverCurrentLocation.put("DriverID", driverProfile.DriverID);
                     driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
                     driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
@@ -539,17 +561,12 @@ public class CurrentTripFragment extends Fragment  {
 
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
                 Log.e("responseMessage:",responseMessage.Response+"");
-                return null;
 
+                return null;
 
             }
 
-
         }.execute();
-
-
-
-
 
     }
 
@@ -557,35 +574,28 @@ public class CurrentTripFragment extends Fragment  {
 
     @Override
     public void onPause() {
-
-            mv.onPause();
-            mc.stopTrackMyLocation();
-
+        mv.onPause();
+        mc.stopTrackMyLocation();
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-
-            mv.onDestroy();
-
+        mv.onDestroy();
         super.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
-
         super.onLowMemory();
-
-            mv.onLowMemory();
+        mv.onLowMemory();
 
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-            mv.onSaveInstanceState(outState);
-
+        mv.onSaveInstanceState(outState);
     }
+
 }

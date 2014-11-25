@@ -57,9 +57,7 @@ public class Launcher extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
+            getFragmentManager().beginTransaction().add(R.id.container, new PlaceholderFragment()).commit();
         }
     }
 
@@ -67,13 +65,13 @@ public class Launcher extends Activity {
      * A placeholder fragment containing a splash screen.
      */
     public static class PlaceholderFragment extends Fragment {
-//        private String SENDER_ID = "APA91bHIJEaJh9884pbCBwdxhVicsiFHgvvBehNghl2OMSQXmJKUb9Q5A0MET1bzPRmDyc6nwNRcrlDhIuumlPM-f4jUUufwzMwxVq07OcYids6AYIu2qUv3yGdEgWxDzLWZrepWbW0pUImE6YdaOx8lU7_54iMPyhArFXR2ld1XtkW9QBOFTug";
 
-        GoogleCloudMessaging gcm;
-        String regid;
-        String PROJECT_NUMBER = "766031645889";
-        String driverIMEI_Number;
-        DriverProfile driverProfile;
+        private GoogleCloudMessaging gcm;
+        private String regid;
+        private String PROJECT_NUMBER = "766031645889";
+        private String driverIMEI_Number;
+        private DriverProfile driverProfile;
+
         public PlaceholderFragment() {
         }
 
@@ -89,31 +87,6 @@ public class Launcher extends Activity {
             return rootView;
         }
 
-        // Check Internet Connection
-        public  boolean isConnected() {
-
-            ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            boolean isConnected = activeNetwork != null &&
-                    activeNetwork.isConnectedOrConnecting();
-            return  isConnected;
-        }
-
-
-        public boolean isFirstTime() {
-
-            SharedPreferences preferences = getActivity().getSharedPreferences("run_before", MODE_PRIVATE);
-            boolean ranBefore = preferences.getBoolean("RanBefore", false);
-            if (!ranBefore) {
-                // first time
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("RanBefore", true);
-                editor.commit();
-            }
-            return !ranBefore;
-        }
-
         @Override
         public void onResume() {
             super.onResume();
@@ -122,15 +95,15 @@ public class Launcher extends Activity {
                     getRegId();
                 } else {    // show home screen
                     new CountDownTimer(2500, 1000) {
-                       @Override
+                        @Override
                         public void onFinish() {
-                           try {
-                               Intent i = new Intent(getActivity(), DrawerActivity.class);
-                               startActivity(i);
-                               getActivity().finish();
-                           } catch (NullPointerException e){
-                               e.printStackTrace();
-                           }
+                            try {
+                                Intent i = new Intent(getActivity(), DrawerActivity.class);
+                                startActivity(i);
+                                getActivity().finish();
+                            } catch (NullPointerException e){
+                                e.printStackTrace();
+                            }
                         }
                         @Override
                         public void onTick(long millisUntilFinished) {
@@ -138,7 +111,7 @@ public class Launcher extends Activity {
                     }.start();
 
                 }
-            } else {
+            } else { // show dialog when internet connection unavailable
                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                 alert.setTitle("Error");
                 alert.setMessage("No Internet Connection");
@@ -163,7 +136,7 @@ public class Launcher extends Activity {
                     driverIMEI_Number= telephonyManager.getDeviceId();
 
                     Log.e("imei number...........",driverIMEI_Number+"");
-//                String SENDER_ID="APA91bHGfPgU7dKGF6cbBX8xhPePRTWdXooX2ZkFRDgVjNpcSWogjoUxYsbtrJH0MimExsdtpNMO_Clapjm1blkWxGuWwqB3WrerMBA-uh48CtXlIauvZj6hfEwefWDqApz37xELI4hrjRFW0yLBNTHCOMOP7IPqKg";
+
                     try {
                         if (gcm == null) {
                             gcm = GoogleCloudMessaging.getInstance(getActivity());
@@ -171,10 +144,12 @@ public class Launcher extends Activity {
                         regid = gcm.register(PROJECT_NUMBER);
                         Log.e("GCM ID :", regid);
                         if(regid==null || regid==""){
+
                             SharedPreferences preferences = getActivity().getSharedPreferences("run_before",MODE_PRIVATE);
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.putBoolean("RanBefore", false);
                             editor.commit();
+
                             AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                             alert.setTitle("Error");
                             alert.setMessage("Internal Server Error");
@@ -193,7 +168,9 @@ public class Launcher extends Activity {
                                 }
                             });
                             alert.show();
+
                         } else {
+
                             if(isConnected()==true) {
                                 checkValidDriver();
                             } else {
@@ -209,6 +186,7 @@ public class Launcher extends Activity {
             }.execute();
 
         } // end of getRegId
+
         public void checkValidDriver() {
             new AsyncTask<Void,Void,Void>(){
                 @Override
@@ -225,15 +203,17 @@ public class Launcher extends Activity {
                     }
                     Reader reader = API.callWebservicePost(AppConstants.DriverProfile, driverProfileObject.toString());
                     driverProfile = new GsonBuilder().create().fromJson(reader, DriverProfile.class);
-                   handlePostData();
+                    handlePostData();
                     return null;
                 }
             }.execute();
         }
+
         public void handlePostData() {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
                     Log.e("Active",driverProfile.Active+"");
                     Log.e("CompanyID",driverProfile.CompanyID+"");
                     Log.e("DriverID",driverProfile.DriverID+"");
@@ -246,7 +226,11 @@ public class Launcher extends Activity {
                     Log.e("Webmyne_Longitude",driverProfile.Webmyne_Longitude+"");
                     Log.e("Webmyne_NotificationID",driverProfile.Webmyne_NotificationID+"");
 
+                    Log.e("Check Valid Driver",driverProfile.Response+"");
+                    Toast.makeText(getActivity(), driverProfile.Webmyne_DriverIMEI_Number+"", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), driverProfile.Response+"", Toast.LENGTH_LONG).show();
                     if(driverProfile.Response.equalsIgnoreCase("Success")) {
+
                         SharedPreferences preferences = getActivity().getSharedPreferences("run_before",MODE_PRIVATE);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putBoolean("RanBefore", true);
@@ -259,11 +243,15 @@ public class Launcher extends Activity {
                         Intent i = new Intent(getActivity(), DrawerActivity.class);
                         startActivity(i);
                         getActivity().finish();
+
                     } else {
+
                         SharedPreferences preferences = getActivity().getSharedPreferences("run_before",MODE_PRIVATE);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putBoolean("RanBefore", false);
                         editor.commit();
+
+                        // show alert when driver's imei number is not match with ddatabase
                         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
                         alert.setTitle("Invalid Driver");
                         alert.setMessage("Driver not Found");
@@ -275,9 +263,35 @@ public class Launcher extends Activity {
                             }
                         });
                         alert.show();
+
                     }
                 }
             });
         }
+
+        // Check Internet Connection
+        public  boolean isConnected() {
+
+            ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+            return  isConnected;
+        }
+
+        public boolean isFirstTime() {
+
+            SharedPreferences preferences = getActivity().getSharedPreferences("run_before", MODE_PRIVATE);
+            boolean ranBefore = preferences.getBoolean("RanBefore", false);
+            if (!ranBefore) {
+                // first time
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("RanBefore", true);
+                editor.commit();
+            }
+            return !ranBefore;
+        }
+
     } // end of fragment
+
+
 }

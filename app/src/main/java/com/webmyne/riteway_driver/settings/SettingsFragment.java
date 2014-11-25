@@ -46,21 +46,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class SettingsFragment extends Fragment implements ListDialog.setSelectedListner {
-    LinearLayout linearIntervalTime;
-    TextView txtUpdateTime;
-    ArrayList<String> timeList;
-    Switch driverStatusSwitch;
-    ProgressDialog progressDialog;
-    GPSTracker gpsTracker;
-    double updatedDriverLatitude;
-    double updatedDriverLongitude;
+    private LinearLayout linearIntervalTime;
+    private TextView txtUpdateTime;
+    private ArrayList<String> timeList;
+    private Switch driverStatusSwitch;
+    private ProgressDialog progressDialog;
+    private GPSTracker gpsTracker;
+    private double updatedDriverLatitude;
+    private double updatedDriverLongitude;
     public static Timer timer;
-//    private static int CLICKED_POSITION = 0;
+
     public static SettingsFragment newInstance(String param1, String param2) {
         SettingsFragment fragment = new SettingsFragment();
-
         return fragment;
     }
+
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -68,6 +68,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         gpsTracker = new GPSTracker(getActivity());
         timeList=new ArrayList<String>();
         timeList.add("1");
@@ -82,20 +83,31 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View convView=inflater.inflate(R.layout.fragment_settings, container, false);
-        linearIntervalTime=(LinearLayout)convView.findViewById(R.id.linearIntervalTime);
-        txtUpdateTime=(TextView)convView.findViewById(R.id.txtUpdateTime);
-        driverStatusSwitch=(Switch)convView.findViewById(R.id.driverStatusSwitch);
+        View convertView=inflater.inflate(R.layout.fragment_settings, container, false);
+
         SharedPreferences preferences = getActivity().getSharedPreferences("driver_status",getActivity().MODE_PRIVATE);
         driverStatusSwitch.setChecked(preferences.getBoolean("driver_status", true));
+
         SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
         txtUpdateTime.setText(preferencesTimeInterval.getString("driver_time_interval", "5")+" minutes");
+
+        initView(convertView);
+
+        return convertView;
+    }
+
+    private void initView(View convertView){
+        linearIntervalTime=(LinearLayout)convertView.findViewById(R.id.linearIntervalTime);
+        txtUpdateTime=(TextView)convertView.findViewById(R.id.txtUpdateTime);
+        driverStatusSwitch=(Switch)convertView.findViewById(R.id.driverStatusSwitch);
+
         linearIntervalTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showDialog();
             }
         });
+
         driverStatusSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,17 +128,17 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
                 }
             }
         });
-        return convView;
     }
+
     public  boolean isConnected() {
 
         ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
         return  isConnected;
     }
+
     public void updateDriverStatus(){
 
         new AsyncTask<Void,Void,Void>(){
@@ -146,9 +158,11 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
                 try {
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
                     DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+
                     driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
                     driverStatusObject.put("DriverID", driverProfile.DriverID);
                     Log.e("driverStatusObject: ", driverStatusObject + "");
+
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
@@ -157,8 +171,8 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
                 Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
-                return null;
 
+                return null;
             }
         }.execute();
 
@@ -221,8 +235,6 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
                 }catch (NullPointerException e){
                     e.printStackTrace();
                 }
-
-
     }
 
     public void updateDriverLocation() {
@@ -245,27 +257,25 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
 
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
                     DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+
                     driverCurrentLocation.put("DriverID", driverProfile.DriverID);
                     driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
                     driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
                 Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
-
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
                 Log.e("responseMessage:",responseMessage.Response+"");
-                return null;
 
+                return null;
 
             }
 
 
         }.execute();
 
-
-
     }
-
 
 }

@@ -28,17 +28,19 @@ import java.util.Date;
 
 public class OrdersHistoryFragment extends Fragment implements ListDialog.setSelectedListner {
 
-    SharedPreferenceTrips sharedPreferenceTrips;
-    ListView ordersHistoryListView;
-    OrdersHistoryAdapter ordersHistoryAdapter;
-    TextView txtDateSelection;
-    ArrayList<Trip> ordersHistoryList;
-    ArrayList<Trip> filteredOrderList;
-    ArrayList<String> dateSelectionArray=new ArrayList<String>();
+    private SharedPreferenceTrips sharedPreferenceTrips;
+    private ListView ordersHistoryListView;
+    private OrdersHistoryAdapter ordersHistoryAdapter;
+    private TextView txtDateSelection;
+    private ArrayList<Trip> ordersHistoryList;
+    private ArrayList<Trip> filteredOrderList;
+    private ArrayList<String> dateSelectionArray=new ArrayList<String>();
+
     public static OrdersHistoryFragment newInstance(String param1, String param2) {
         OrdersHistoryFragment fragment = new OrdersHistoryFragment();
         return fragment;
     }
+
     public OrdersHistoryFragment() {
         // Required empty public constructor
     }
@@ -53,8 +55,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View convertView=inflater.inflate(R.layout.fragment_orders_history, container, false);
         txtDateSelection=(TextView)convertView.findViewById(R.id.txtDateSelection);
@@ -65,10 +66,9 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
             }
         });
         ordersHistoryListView =(ListView)convertView.findViewById(R.id.ordersHistoryList);
-//        ordersHistoryAdapter =new OrdersHistoryAdapter(getActivity(), ordersHistoryList);
-//        ordersHistoryListView.setAdapter(ordersHistoryAdapter);
         return convertView;
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -77,12 +77,15 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
             sharedPreferenceTrips=new SharedPreferenceTrips();
             ordersHistoryList=sharedPreferenceTrips.loadTrip(getActivity());
             filteredOrderList=new ArrayList<Trip>();
+
             filterData("Current Week");
+
             if(filteredOrderList != null) {
                 Collections.reverse(filteredOrderList);
                 ordersHistoryAdapter = new OrdersHistoryAdapter(getActivity(), filteredOrderList);
                 ordersHistoryListView.setAdapter(ordersHistoryAdapter);
             }
+
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -124,16 +127,19 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_ordered_history, parent, false);
                 holder = new ViewHolder();
+
                 holder.orderHistoryCname=(TextView)convertView.findViewById(R.id.orderHistoryCname);
                 holder.orderHistoryDate=(TextView)convertView.findViewById(R.id.orderHistoryDate);
                 holder.orderHistoryPickupLocation=(TextView)convertView.findViewById(R.id.orderHistoryPickupLocation);
                 holder.orderHistoryDropoffLocation=(TextView)convertView.findViewById(R.id.orderHistoryDropoffLocation);
                 holder.orderHistoryStatus=(TextView)convertView.findViewById(R.id.orderHistoryStatus);
                 holder.orderHistoryFareAmount=(TextView)convertView.findViewById(R.id.currentOrderFareAmount);
+
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
+
             holder.orderHistoryCname.setText(currentOrdersList.get(position).CustomerName);
             holder.orderHistoryDate.setText(getFormatedDate(currentOrdersList.get(position)));
             holder.orderHistoryPickupLocation.setText("pickup: "+currentOrdersList.get(position).PickupAddress);
@@ -154,12 +160,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
                 }
             });
             return convertView;
-
-
         }
-
-
-
     }
 
     private void filterData(String filterType){
@@ -189,8 +190,10 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
                 c.set(c.DAY_OF_MONTH,31);
                 lastWeekOfYear=c.get(c.WEEK_OF_YEAR);
             }
+
             int currentMonth=calendar.get(calendar.MONTH);
             int lastMonth=currentMonth-1;
+
             if(lastMonth<0){
                 Calendar c = Calendar.getInstance();
                 c.set(c.YEAR,calendar.YEAR-1);
@@ -269,6 +272,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
         Date date = float2Date(dateinFloat);
         return  format.format(date);
     }
+
     public  java.util.Date float2Date(float nbSeconds) {
         java.util.Date date_origine;
         java.util.Calendar date = java.util.Calendar.getInstance();
@@ -279,6 +283,7 @@ public class OrdersHistoryFragment extends Fragment implements ListDialog.setSel
         date.add(java.util.Calendar.SECOND, (int) nbSeconds);
         return date.getTime();
     }
+
     public double getTotal(Trip currentTrip) {
         Double total;
         String tripFareValue=String.format("%.2f", Double.parseDouble(currentTrip.TripDistance)*0.6214*Double.parseDouble(currentTrip.TripFare));

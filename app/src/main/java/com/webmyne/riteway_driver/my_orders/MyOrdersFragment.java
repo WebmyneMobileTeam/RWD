@@ -57,27 +57,24 @@ import java.util.TimerTask;
 
 
 public class MyOrdersFragment extends Fragment {
+
     private SharedPreferenceTrips sharedPreferenceTrips;
     private SharedPreferenceNotification sharedPreferenceNotification;
     private PagerSlidingTabStrip tabs;
     private ViewPager pager;
     private int badgeValue=0;
     private MyPagerAdapter adapter;
-    ProgressDialog progressDialog;
-    ArrayList<Trip> tripArrayList;
+    private ProgressDialog progressDialog;
+    private ArrayList<Trip> tripArrayList;
     public static Timer timer;
-    ArrayList<DriverNotification> notificationList;
-//    private MapView mv;
-//    private MapController mc;
-    public boolean needUpdatedLocation=true;
-//    Location currentLocation;
+    private ArrayList<DriverNotification> notificationList;
     private String latituteValue;
     private String longitudeValue;
-    double updatedDriverLatitude;
-    double updatedDriverLongitude;
+    private double updatedDriverLatitude;
+    private double updatedDriverLongitude;
     private LocationManager locationManager;
     private String provider;
-    GPSTracker gpsTracker;
+    private GPSTracker gpsTracker;
 
     public static MyOrdersFragment newInstance(String param1, String param2) {
         MyOrdersFragment fragment = new MyOrdersFragment();
@@ -91,7 +88,7 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       gpsTracker = new GPSTracker(getActivity());
+        gpsTracker = new GPSTracker(getActivity());
     }
 
     @Override
@@ -99,15 +96,16 @@ public class MyOrdersFragment extends Fragment {
         View convertView=inflater.inflate(R.layout.fragment_my_orders, container, false);
         tabs = (PagerSlidingTabStrip)convertView.findViewById(R.id.my_order_tabs);
         pager = (ViewPager) convertView.findViewById(R.id.pager);
-
-
-
         return convertView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        sharedPreferenceTrips=new SharedPreferenceTrips();
+        sharedPreferenceNotification=new SharedPreferenceNotification();
+
         try {
             if (SettingsFragment.timer != null) {
                 SettingsFragment.timer.cancel();
@@ -122,19 +120,20 @@ public class MyOrdersFragment extends Fragment {
             public void onFinish() {
 
                 try {
-            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-            final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
+                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+                    final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
 
                     timer=new Timer();
-            timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    updateDriverLocation();
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            updateDriverLocation();
+                        }
+                    },0,1000*60*Integer.parseInt(updatedTimeInterval));
+
+                }catch (NullPointerException e){
+                    e.printStackTrace();
                 }
-            },0,1000*60*Integer.parseInt(updatedTimeInterval));
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }
             }
 
             @Override
@@ -142,24 +141,23 @@ public class MyOrdersFragment extends Fragment {
             }
         }.start();
 
+
         if(isConnected()==true) {
             getTripList();
         } else {
             Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
         }
-        sharedPreferenceTrips=new SharedPreferenceTrips();
-        sharedPreferenceNotification=new SharedPreferenceNotification();
+
     }
 
     public  boolean isConnected() {
 
         ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return  isConnected;
     }
+
     public void updateDriverLocation() {
 
         if (gpsTracker.canGetLocation()) {
@@ -169,7 +167,6 @@ public class MyOrdersFragment extends Fragment {
 
         Log.e("latitude main: ",updatedDriverLatitude+"");
         Log.e("Longitude main: ",updatedDriverLongitude+"");
-
 
         new AsyncTask<Void,Void,Void>(){
 
@@ -183,22 +180,19 @@ public class MyOrdersFragment extends Fragment {
                     driverCurrentLocation.put("DriverID", driverProfile.DriverID);
                     driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
                     driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
                 Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
-
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
                 Log.e("responseMessage:",responseMessage.Response+"");
                 return null;
-
 
             }
 
 
         }.execute();
-
-
 
     }
 
@@ -222,13 +216,15 @@ public class MyOrdersFragment extends Fragment {
 
                 Type listType=new TypeToken<List<Trip>>(){
                 }.getType();
+
                 tripArrayList = new GsonBuilder().create().fromJson(response, listType);
 
                 sharedPreferenceTrips.clearTrip(getActivity());
+
                 for(int i=0;i<tripArrayList.size();i++){
                     sharedPreferenceTrips.saveTrip(getActivity(),tripArrayList.get(i));
-
                 }
+
                 adapter = new MyPagerAdapter(getActivity().getSupportFragmentManager());
                 pager.setAdapter(adapter);
                 final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
@@ -249,8 +245,6 @@ public class MyOrdersFragment extends Fragment {
         }.start();
 
     }
-
-
 
     public void getNotificationList() {
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);

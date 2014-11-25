@@ -33,25 +33,17 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class DrawerActivity extends BaseActivity implements AdapterView.OnItemClickListener {
+
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerArrowDrawable drawerArrow;
     private DrawerLayout drawer;
     private ListView leftDrawerList;
     private String badgevalue;
     private String[] leftSliderData = {"MY ORDERS", "NOTIFICATIONS", "SETTINGS"};
-    NavigationDrawerAdapter navigationDrawerAdapter;
-    public static String CURRENT_TRIP = "current_trip";
-    public static String MY_ORDERS = "my_orders";
-
-    public static String NOTIFICATIONS = "notifications";
-    public static String SETTINGS = "settings";
-
-
-    @Override
-    public View onCreateView(String name, Context context, AttributeSet attrs) {
-        return CustomTypeface.getInstance().createView(name, context, attrs);
-    }
-
+    private NavigationDrawerAdapter navigationDrawerAdapter;
+    private static String MY_ORDERS = "my_orders";
+    private static String NOTIFICATIONS = "notifications";
+    private static String SETTINGS = "settings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,49 +53,22 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
         //Load My Orders First
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
-
-
         MyOrdersFragment myOrdersFragment = MyOrdersFragment.newInstance("", "");
         if (manager.findFragmentByTag(MY_ORDERS) == null) {
             ft.replace(R.id.main_content, myOrdersFragment,MY_ORDERS).commit();
         }
+
         txtHeader.setText("MY ORDERS");
         initFields();
         initDrawer();
     }
+
     private void initFields() {
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         leftDrawerList = (ListView) findViewById(R.id.left_drawer);
         leftDrawerList.setOnItemClickListener(this);
 
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        navigationDrawerAdapter=new NavigationDrawerAdapter(DrawerActivity.this, leftSliderData);
-        leftDrawerList.setAdapter(navigationDrawerAdapter);
-        SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
-        badgevalue=(sharedPreferences.getString("badge_value",null));
-//        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(DrawerActivity.this, "driver_data", 0);
-//        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-//        Log.e("driver notification id: ",driverProfile.Webmyne_NotificationID+"");
-
-
-//        if(OrderDetailActivity.isAcceptRequest==true){
-//            OrderDetailActivity.isAcceptRequest=false;
-//            FragmentManager manager = getSupportFragmentManager();
-//            FragmentTransaction ft = manager.beginTransaction();
-//
-//            CurrentTripFragment currentTripFragment = CurrentTripFragment.newInstance("", "");
-//            if (manager.findFragmentByTag(CURRENT_TRIP) == null) {
-//                ft.replace(R.id.main_content, currentTripFragment,CURRENT_TRIP).commit();
-//            }
-//            txtHeader.setText("CURRENT TRIP");
-//
-//        }
-}
-
-
 
     private void initDrawer() {
 
@@ -115,13 +80,10 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
                 return false;
             }
         };
-
         mDrawerToggle = new ActionBarDrawerToggle(this, drawer,drawerArrow, R.string.drawer_open,R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-
-
             }
 
             public void onDrawerOpened(View drawerView) {
@@ -136,57 +98,18 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        // Add your onclick logic here
-        drawer.closeDrawers();
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction ft = manager.beginTransaction();
-        //drawer items for pupil
-
-        switch (position) {
-
-
-            case 0:
-                MyOrdersFragment myOrdersFragment = MyOrdersFragment.newInstance("", "");
-                if (manager.findFragmentByTag(MY_ORDERS) == null) {
-                    ft.replace(R.id.main_content, myOrdersFragment,MY_ORDERS).commit();
-                }
-                txtHeader.setText("MY ORDERS");
-                break;
-
-
-            case 1:
-                NotificationFragment notificationFragment = NotificationFragment.newInstance("", "");
-                if (manager.findFragmentByTag(NOTIFICATIONS) == null) {
-                    ft.replace(R.id.main_content, notificationFragment,NOTIFICATIONS).commit();
-                }
-                txtHeader.setText("NOTIFICATIONS");
-                break;
-
-            case 2:
-                SettingsFragment settingsFragment = SettingsFragment.newInstance("", "");
-                if (manager.findFragmentByTag(SETTINGS) == null) {
-                    ft.replace(R.id.main_content, settingsFragment,SETTINGS).commit();
-                }
-                txtHeader.setText("SETTINGS");
-                break;
-
-
-
-        }
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        return CustomTypeface.getInstance().createView(name, context, attrs);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerToggle.onOptionsItemSelected(item);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
+    protected void onResume() {
+        super.onResume();
+        navigationDrawerAdapter=new NavigationDrawerAdapter(DrawerActivity.this, leftSliderData);
+        leftDrawerList.setAdapter(navigationDrawerAdapter);
+        SharedPreferences sharedPreferences = getSharedPreferences("badge_value",MODE_PRIVATE);
+        badgevalue=(sharedPreferences.getString("badge_value",null));
+}
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -194,7 +117,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
         mDrawerToggle.syncState();
     }
 
-//region Drawer code
+
 // Navigation Drawer Adapter
 public class NavigationDrawerAdapter extends BaseAdapter {
 
@@ -261,12 +184,74 @@ public class NavigationDrawerAdapter extends BaseAdapter {
     }
 
 }
-    //</editor-fold>
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        // Add your onclick logic here
+        drawer.closeDrawers();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        //drawer items for pupil
+
+        switch (position) {
+
+
+            case 0:
+                MyOrdersFragment myOrdersFragment = MyOrdersFragment.newInstance("", "");
+                if (manager.findFragmentByTag(MY_ORDERS) == null) {
+                    ft.replace(R.id.main_content, myOrdersFragment,MY_ORDERS).commit();
+                }
+                txtHeader.setText("MY ORDERS");
+                break;
+
+
+            case 1:
+                NotificationFragment notificationFragment = NotificationFragment.newInstance("", "");
+                if (manager.findFragmentByTag(NOTIFICATIONS) == null) {
+                    ft.replace(R.id.main_content, notificationFragment,NOTIFICATIONS).commit();
+                }
+                txtHeader.setText("NOTIFICATIONS");
+                break;
+
+            case 2:
+                SettingsFragment settingsFragment = SettingsFragment.newInstance("", "");
+                if (manager.findFragmentByTag(SETTINGS) == null) {
+                    ft.replace(R.id.main_content, settingsFragment,SETTINGS).commit();
+                }
+                txtHeader.setText("SETTINGS");
+                break;
+
+
+
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerToggle.onOptionsItemSelected(item);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            Log.e("timer: ","timer cancelled");
+            MyOrdersFragment.timer.cancel();
+            SettingsFragment.timer.cancel();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

@@ -39,12 +39,14 @@ import java.util.List;
 
 
 public class NotificationFragment extends Fragment implements ListDialog.setSelectedListner{
-    ArrayList<DriverNotification> notificationList;
+
+    private ArrayList<DriverNotification> notificationList;
     private SharedPreferenceNotification sharedPreferenceNotification;
-    ListView lvCustomerNotifications;
-    NotificationAdapter notificationAdapter;
-    TextView txtDateSelectionForNotification;
-    ArrayList<String> dateSelectionArray=new ArrayList<String>();
+    private ListView lvCustomerNotifications;
+    private NotificationAdapter notificationAdapter;
+    private TextView txtDateSelectionForNotification;
+    private ArrayList<String> dateSelectionArray=new ArrayList<String>();
+
     public static NotificationFragment newInstance(String param1, String param2) {
         NotificationFragment fragment = new NotificationFragment();
         return fragment;
@@ -55,11 +57,7 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
-
-
         dateSelectionArray.add("Current Week");
         dateSelectionArray.add("Last Week");
         dateSelectionArray.add("Current Month");
@@ -86,11 +84,13 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
     @Override
     public void onResume() {
         super.onResume();
+
         if(isConnected()==true) {
             unreadAllNotification();
         } else {
             Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
         }
+
         try {
             sharedPreferenceNotification = new SharedPreferenceNotification();
             notificationList = sharedPreferenceNotification.loadNotification(getActivity());
@@ -102,16 +102,14 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
 
+    }
 
     public  boolean isConnected() {
 
         ConnectivityManager cm =(ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return  isConnected;
     }
 
@@ -123,35 +121,23 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
 
             @Override
             public void response(String response) {
-
-
-
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-
                 Log.e("response message for unread all: ",responseMessage.Response+"");
             }
 
             @Override
             public void error(VolleyError error) {
-
                 Log.e("error: ",error+"");
-
             }
         }.start();
-
     }
 
     public class NotificationAdapter extends BaseAdapter {
 
         Context context;
-
-        LayoutInflater inflater;
-
         ArrayList<DriverNotification> notificationList;
 
-
         public NotificationAdapter(Context context, ArrayList<DriverNotification> notificationList) {
-
             this.context = context;
             this.notificationList = notificationList;
         }
@@ -181,6 +167,7 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_notification, parent, false);
                 holder = new ViewHolder();
+
                 holder.txtMessageTitle=(TextView)convertView.findViewById(R.id.txtMessageTitle);
                 holder.txtNotificationDate=(TextView)convertView.findViewById(R.id.txtNotificationDate);
                 holder.txtNotificationMessage=(TextView)convertView.findViewById(R.id.txtNotificationMessage);
@@ -194,6 +181,7 @@ public class NotificationFragment extends Fragment implements ListDialog.setSele
                 holder.txtNotificationDate.setTextColor(Color.GREEN);
 
             }
+
             holder.txtMessageTitle.setText(notificationList.get(position).Title);
             holder.txtNotificationDate.setText(notificationList.get(position).Date);
             holder.txtNotificationMessage.setText(notificationList.get(position).Message);
