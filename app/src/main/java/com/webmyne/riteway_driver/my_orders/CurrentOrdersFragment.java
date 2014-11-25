@@ -62,6 +62,7 @@ public class CurrentOrdersFragment extends Fragment {
         // Inflate the layout for this fragment
         View convertView=inflater.inflate(R.layout.fragment_current_orders, container, false);
         currentOrdersListView=(ListView)convertView.findViewById(R.id.currentOrdersList);
+        currentOrdersListView.setEmptyView(convertView.findViewById(R.id.empty));
         return convertView;
     }
 

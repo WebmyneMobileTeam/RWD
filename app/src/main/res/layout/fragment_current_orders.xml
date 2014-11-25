@@ -2,9 +2,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/activity_background"
     >
+
+    <TextView
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:text="No Data Found"
+        android:textSize="@dimen/text_size_medium"
+        app:customTypeface="@string/bold"
+        tools:ignore="MissingPrefix"
+
+        android:layout_height="match_parent" />
 
     <ListView
         android:layout_marginTop="@dimen/activity_margin"
@@ -12,7 +24,7 @@
         android:background="@android:color/white"
         android:id="@+id/currentOrdersList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:dividerHeight="@dimen/activity_margin"
         android:drawSelectorOnTop="true"
         android:divider="@color/activity_background">

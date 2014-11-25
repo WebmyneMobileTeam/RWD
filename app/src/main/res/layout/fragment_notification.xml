@@ -8,6 +8,17 @@
     android:background="@color/activity_background"
     tools:context="com.webmyne.rightway.MyNotifications.MyNotificationFragment">
 
+    <TextView
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:text="No Data Found"
+        android:textSize="@dimen/text_size_medium"
+        app:customTypeface="@string/bold"
+        tools:ignore="MissingPrefix"
+        android:layout_height="match_parent" />
+
     <ListView
         android:layout_above="@+id/viewDivider"
         android:layout_alignParentTop="true"

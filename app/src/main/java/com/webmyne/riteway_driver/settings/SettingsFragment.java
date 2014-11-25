@@ -85,13 +85,13 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         // Inflate the layout for this fragment
         View convertView=inflater.inflate(R.layout.fragment_settings, container, false);
 
-        SharedPreferences preferences = getActivity().getSharedPreferences("driver_status",getActivity().MODE_PRIVATE);
-        driverStatusSwitch.setChecked(preferences.getBoolean("driver_status", true));
-
-        SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-        txtUpdateTime.setText(preferencesTimeInterval.getString("driver_time_interval", "5")+" minutes");
-
         initView(convertView);
+
+            SharedPreferences preferences = getActivity().getSharedPreferences("driver_status", getActivity().MODE_PRIVATE);
+            driverStatusSwitch.setChecked(preferences.getBoolean("driver_status", true));
+
+            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval", getActivity().MODE_PRIVATE);
+            txtUpdateTime.setText(preferencesTimeInterval.getString("driver_time_interval", "5") + " minutes");
 
         return convertView;
     }

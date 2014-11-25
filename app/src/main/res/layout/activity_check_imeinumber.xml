@@ -1,0 +1,56 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.webmyne.riteway_driver.home.CheckValidDriver">
+
+
+
+
+    <EditText
+        android:layout_marginTop="8dp"
+
+        android:id="@+id/etCode"
+        app:customTypeface="@string/normal"
+        tools:ignore="MissingPrefix"
+        android:hint="Enter Secret Code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:textSize="@dimen/text_size_medium"
+        />
+
+    <Button
+        android:textStyle="bold"
+        android:background="@color/actionbar"
+        android:layout_marginTop="8dp"
+        app:customTypeface="@string/bold"
+        tools:ignore="MissingPrefix"
+        android:text="     Check     "
+
+        android:textColor="@android:color/black"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/btnCheck"
+        android:layout_below="@+id/etCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_marginTop="8dp"
+        android:layout_below="@+id/btnCheck"
+        android:text="Note: Don't share your secret code with anyone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minLines="5"
+        app:customTypeface="@string/light"
+        tools:ignore="MissingPrefix"
+        android:inputType="text"
+        android:textSize="@dimen/text_size_medium"
+        />
+
+</RelativeLayout>

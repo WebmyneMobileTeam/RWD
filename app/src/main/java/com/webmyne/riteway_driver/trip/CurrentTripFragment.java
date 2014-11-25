@@ -45,10 +45,8 @@ import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.my_orders.Trip;
 import com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackFragment;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.Reader;
 import java.util.List;
 import java.util.Locale;

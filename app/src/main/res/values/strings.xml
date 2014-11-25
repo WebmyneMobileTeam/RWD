@@ -12,5 +12,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_order_detail">OrderDetailActivity</string>
     <string name="title_activity_receipt_and_feedback">ReceiptAndFeedbackActivity</string>
+    <string name="title_activity_check_imeinumber">CheckIMEINumber</string>
 
 </resources>

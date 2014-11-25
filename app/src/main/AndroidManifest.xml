@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.webmyne.riteway_driver" >
+
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -81,6 +82,11 @@
         <activity
             android:name="com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackActivity"
             android:label="@string/title_activity_receipt_and_feedback" >
+        </activity>
+        <activity
+            android:name=".home.CheckValidDriver"
+            android:windowSoftInputMode="adjustPan"
+            android:label="@string/title_activity_check_imeinumber" >
         </activity>
     </application>
 

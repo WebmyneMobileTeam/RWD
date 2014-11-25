@@ -44,6 +44,7 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
     private static String MY_ORDERS = "my_orders";
     private static String NOTIFICATIONS = "notifications";
     private static String SETTINGS = "settings";
+    private TextView txtDriverName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +69,14 @@ public class DrawerActivity extends BaseActivity implements AdapterView.OnItemCl
         leftDrawerList = (ListView) findViewById(R.id.left_drawer);
         leftDrawerList.setOnItemClickListener(this);
 
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(DrawerActivity.this, "driver_data", 0);
+        DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+        complexPreferences.commit();
+
+        txtDriverName=(TextView)findViewById(R.id.txtDriverName);
+        if(driverProfile !=null) {
+            txtDriverName.setText(driverProfile.FirstName + " " + driverProfile.LastName);
+        }
     }
 
     private void initDrawer() {

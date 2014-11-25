@@ -68,6 +68,7 @@ public class CanceledOrdersFragment extends Fragment implements ListDialog.setSe
             }
         });
         ordersCanceledListView =(ListView)convertView.findViewById(R.id.canceledOrdersList);
+        ordersCanceledListView.setEmptyView(convertView.findViewById(R.id.empty));
         return  convertView;
     }
 
