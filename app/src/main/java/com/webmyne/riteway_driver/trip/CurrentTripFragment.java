@@ -37,6 +37,7 @@ import com.google.gson.GsonBuilder;
 import com.webmyne.riteway_driver.MapNavigator.Navigator;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
+import com.webmyne.riteway_driver.customViews.CircleDialog;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.API;
@@ -59,7 +60,7 @@ public class CurrentTripFragment extends Fragment  {
     private MapView mv;
     private MapController mc;
     private TextView txtCommonButton;
-    private ProgressDialog progressDialog;
+    private CircleDialog circleDialog;
     public boolean needUpdatedLocation=true;
     private Location currentLocation;
     private double updatedDriverLatitude;
@@ -366,10 +367,9 @@ public class CurrentTripFragment extends Fragment  {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(false);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
+                circleDialog=new CircleDialog(getActivity(),0);
+                circleDialog.setCancelable(true);
+                circleDialog.show();
             }
 
             @Override
@@ -384,7 +384,7 @@ public class CurrentTripFragment extends Fragment  {
                     driverStatusObject.put("CustomerNotificationID", currentTrip.CustomerNotificationID);
                     driverStatusObject.put("TripID", currentTrip.TripID);
                     driverStatusObject.put("TripStatus", AppConstants.tripArrivedOnSiteStatus);
-                    Log.e("driverStatusObject: ", driverStatusObject + "");
+//                    Log.e("driverStatusObject: ", driverStatusObject + "");
 
                 }catch(JSONException e) {
                     e.printStackTrace();
@@ -392,7 +392,7 @@ public class CurrentTripFragment extends Fragment  {
 
                 Reader reader = API.callWebservicePost(AppConstants.DriverArrivedNotification, driverStatusObject.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                Log.e("responseMessage:",responseMessage.Response+"");
+//                Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
 
                 return null;
@@ -406,7 +406,7 @@ public class CurrentTripFragment extends Fragment  {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressDialog.dismiss();
+                circleDialog.dismiss();
                 txtCommonButton.setText("START TRIP");
             }
         });
@@ -414,10 +414,9 @@ public class CurrentTripFragment extends Fragment  {
 
     public void updateStartTripStatus(final String status) {
 
-        progressDialog=new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+        circleDialog=new CircleDialog(getActivity(),0);
+        circleDialog.setCancelable(true);
+        circleDialog.show();
 
         JSONObject tripObject = new JSONObject();
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
@@ -427,7 +426,7 @@ public class CurrentTripFragment extends Fragment  {
             tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
             tripObject.put("TripID", currentTrip.TripID+"");
             tripObject.put("TripStatus", status);
-            Log.e("tripObject: ", tripObject + "");
+//            Log.e("tripObject: ", tripObject + "");
 
         }catch(JSONException e) {
             e.printStackTrace();
@@ -440,9 +439,9 @@ public class CurrentTripFragment extends Fragment  {
                 String response = jobj.toString();
 
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                Log.e("after start trip response: ", responseMessage.Response +"");
+//                Log.e("after start trip response: ", responseMessage.Response +"");
 
-                progressDialog.dismiss();
+                circleDialog.dismiss();
 
                 if(responseMessage.Response.equalsIgnoreCase("Success")) {
                     Toast.makeText(getActivity(), "Trip Started Successfully", Toast.LENGTH_SHORT).show();
@@ -465,10 +464,9 @@ public class CurrentTripFragment extends Fragment  {
 
     public void updateStopTripStatus(final String status) {
 
-        progressDialog=new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+        circleDialog=new CircleDialog(getActivity(),0);
+        circleDialog.setCancelable(true);
+        circleDialog.show();
 
         JSONObject tripObject = new JSONObject();
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "current_trip_details", 0);
@@ -478,7 +476,7 @@ public class CurrentTripFragment extends Fragment  {
             tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
             tripObject.put("TripID", currentTrip.TripID+"");
             tripObject.put("TripStatus", status);
-            Log.e("tripObject: ", tripObject + "");
+//            Log.e("tripObject: ", tripObject + "");
 
 
         }catch(JSONException e) {
@@ -492,9 +490,9 @@ public class CurrentTripFragment extends Fragment  {
                 String response = jobj.toString();
 
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(response, ResponseMessage.class);
-                Log.e("after stop trip response: ", responseMessage.Response +"");
+//                Log.e("after stop trip response: ", responseMessage.Response +"");
 
-                progressDialog.dismiss();
+                circleDialog.dismiss();
 
                 if(responseMessage.Response.equalsIgnoreCase("Success")) {
 //                    Toast.makeText(getActivity(), "Trip Stop Successfully", Toast.LENGTH_SHORT).show();
@@ -535,8 +533,8 @@ public class CurrentTripFragment extends Fragment  {
     public void updateDriverLocation() {
 
         needUpdatedLocation=true;
-        Log.e("latitude: ",updatedDriverLatitude+"");
-        Log.e("Longitude",updatedDriverLongitude+"");
+//        Log.e("latitude: ",updatedDriverLatitude+"");
+//        Log.e("Longitude",updatedDriverLongitude+"");
 
         new AsyncTask<Void,Void,Void>(){
 
@@ -558,7 +556,7 @@ public class CurrentTripFragment extends Fragment  {
                 Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
 
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                Log.e("responseMessage:",responseMessage.Response+"");
+//                Log.e("responseMessage:",responseMessage.Response+"");
 
                 return null;
 

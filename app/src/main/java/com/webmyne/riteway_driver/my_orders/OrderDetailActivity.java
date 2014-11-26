@@ -26,6 +26,7 @@ import com.google.gson.GsonBuilder;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
 import com.webmyne.riteway_driver.application.MyApplication;
+import com.webmyne.riteway_driver.customViews.CircleDialog;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
@@ -88,7 +89,8 @@ public class OrderDetailActivity extends BaseActivity {
     public static class PlaceholderFragment extends android.app.Fragment {
 
 
-        private ProgressDialog progressDialog;
+        private CircleDialog circleDialog;
+
         private Trip currentTrip;
         private TextView currentTripDriverName, currentTripPickup, currentTripDropoff, currentTripPickupNote, currentTripDate, currentTripTime,
                 currentTripDistance, txtTripStatus, currentTripPaymentType, currentTripFare, currentTripTip, currentTripFee,txtTotalAmount,
@@ -246,10 +248,9 @@ public class OrderDetailActivity extends BaseActivity {
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();
-                    progressDialog=new ProgressDialog(getActivity());
-                    progressDialog.setCancelable(false);
-                    progressDialog.setMessage("Loading...");
-                    progressDialog.show();
+                    circleDialog=new CircleDialog(getActivity(),0);
+                    circleDialog.setCancelable(true);
+                    circleDialog.show();
                 }
 
                 @Override
@@ -261,7 +262,7 @@ public class OrderDetailActivity extends BaseActivity {
                         tripObject.put("CustomerNotificationID",currentTrip.CustomerNotificationID+"");
                         tripObject.put("TripID", currentTrip.TripID+"");
                         tripObject.put("TripStatus", status);
-                        Log.e("tripObject: ", tripObject + "");
+//                        Log.e("tripObject: ", tripObject + "");
 
 
                     }catch(JSONException e) {
@@ -271,7 +272,7 @@ public class OrderDetailActivity extends BaseActivity {
                     Reader reader = API.callWebservicePost(AppConstants.RequestedTripStatus, tripObject.toString());
 
                     ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                    Log.e("responseMessage:",responseMessage.Response+"");
+//                    Log.e("responseMessage:",responseMessage.Response+"");
                     handlePostData();
                     return null;
                 }
@@ -283,7 +284,7 @@ public class OrderDetailActivity extends BaseActivity {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    progressDialog.dismiss();
+                    circleDialog.dismiss();
                     getActivity().finish();
                 }
             });

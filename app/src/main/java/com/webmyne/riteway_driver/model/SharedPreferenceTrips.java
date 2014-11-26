@@ -45,7 +45,7 @@ public class SharedPreferenceTrips {
         Gson gson = new Gson();
         String jsonFavorites = gson.toJson(tripArrayList);
         editor.putString(PREF_VALUE, jsonFavorites);
-        Log.e("trip list:", jsonFavorites + "");
+//        Log.e("trip list:", jsonFavorites + "");
         editor.commit();
     }
 
@@ -57,7 +57,7 @@ public class SharedPreferenceTrips {
         Gson gson = new Gson();
         Trip[] favoriteItems = gson.fromJson(jsonFavorites,Trip[].class);
         tripList = new ArrayList<Trip>(Arrays.asList(favoriteItems));
-        Log.e("teacher array", tripList + "");
+//        Log.e("teacher array", tripList + "");
         return (ArrayList<Trip>) tripList;
     }
 

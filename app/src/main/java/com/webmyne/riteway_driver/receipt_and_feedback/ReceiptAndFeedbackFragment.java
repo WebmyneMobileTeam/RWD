@@ -29,6 +29,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.GsonBuilder;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
+import com.webmyne.riteway_driver.customViews.CircleDialog;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.customViews.ListDialog;
 import com.webmyne.riteway_driver.model.API;
@@ -56,7 +57,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
     private String newFare,newDropoffAddress,newDropoffLatitude,newDropoffLongitude,newDistance;
     private Trip currentTrip;
     private ArrayList<String> dateSelectionArray=new ArrayList<String>();
-    private ProgressDialog progressDialog;
+    private CircleDialog circleDialog;
 
     public static ReceiptAndFeedbackFragment newInstance(String param1, String param2) {
         ReceiptAndFeedbackFragment fragment = new ReceiptAndFeedbackFragment();
@@ -172,10 +173,9 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(false);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
+                circleDialog=new CircleDialog(getActivity(),0);
+                circleDialog.setCancelable(true);
+                circleDialog.show();
             }
 
             @Override
@@ -197,14 +197,14 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
                     driverStatusObject.put("TripFare", currentTrip.TripFare+"");
                     driverStatusObject.put("isCustomerFeedbackGiven", true);
                     driverStatusObject.put("TripDistance", newDistance+"");
-                    Log.e("driverStatusObject: ", driverStatusObject + "");
+//                    Log.e("driverStatusObject: ", driverStatusObject + "");
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
 
                 Reader reader = API.callWebservicePost(AppConstants.TripCompletion, driverStatusObject.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                Log.e("responseMessage:",responseMessage.Response+"");
+//                Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
                 return null;
             }
@@ -216,7 +216,7 @@ public class ReceiptAndFeedbackFragment extends Fragment implements ListDialog.s
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressDialog.dismiss();
+                circleDialog.dismiss();
                 FragmentManager manager = getActivity().getSupportFragmentManager();
                 Toast.makeText(getActivity(), "Trip completed Successfully", Toast.LENGTH_SHORT).show();
                 FragmentTransaction ft = manager.beginTransaction();

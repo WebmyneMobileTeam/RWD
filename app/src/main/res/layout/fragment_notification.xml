@@ -33,14 +33,14 @@
         android:layout_above="@+id/txtDateSelectionForNotification"
 
         android:layout_width="match_parent"
-        android:background="@color/actionbar"
+        android:background="@android:color/darker_gray"
         android:layout_height="1dp"/>
 
     <TextView
         android:id="@+id/txtDateSelectionForNotification"
         android:padding="10dp"
         android:gravity="center"
-        android:background="@color/actionbar"
+        android:background="@drawable/button_selector"
         android:layout_alignParentBottom="true"
         android:textSize="@dimen/text_size_medium"
         android:textColor="@android:color/black"

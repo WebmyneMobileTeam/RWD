@@ -21,6 +21,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.GsonBuilder;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
+import com.webmyne.riteway_driver.customViews.CircleDialog;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
@@ -40,13 +41,14 @@ public class CheckValidDriver extends BaseActivity {
     private String regid;
     private String PROJECT_NUMBER = "766031645889";
     private DriverProfile driverProfile;
-    private ProgressDialog progressDialog;
+//    private ProgressDialog progressDialog;
+    private CircleDialog circleDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_imeinumber);
         etCode=(EditText)findViewById(R.id.etCode);
-        txtHeader.setText("CHECK VALID DRIVER");
+        txtHeader.setText("DRIVER VERIFICATION");
         btnCheck=(Button)findViewById(R.id.btnCheck);
         btnCheck.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,10 +73,9 @@ public class CheckValidDriver extends BaseActivity {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                progressDialog=new ProgressDialog(CheckValidDriver.this);
-                progressDialog.setCancelable(true);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
+                circleDialog=new CircleDialog(CheckValidDriver.this,0);
+                circleDialog.setCancelable(true);
+                circleDialog.show();
             }
 
             @Override
@@ -85,7 +86,7 @@ public class CheckValidDriver extends BaseActivity {
                         gcm = GoogleCloudMessaging.getInstance(CheckValidDriver.this);
                     }
                     regid = gcm.register(PROJECT_NUMBER);
-                    Log.e("GCM ID :", regid);
+//                    Log.e("GCM ID :", regid);
                     if(regid==null || regid==""){
 
                         SharedPreferences preferences = getSharedPreferences("run_before", MODE_PRIVATE);
@@ -140,7 +141,7 @@ public class CheckValidDriver extends BaseActivity {
                     driverProfileObject.put("Webmyne_DeviceType", AppConstants.deviceType);
                     driverProfileObject.put("Webmyne_DriverIMEI_Number",etCode.getText().toString().trim());
                     driverProfileObject.put("Webmyne_NotificationID", regid+"");
-                    Log.e("driverProfileObject: ",driverProfileObject+"");
+//                    Log.e("driverProfileObject: ",driverProfileObject+"");
                 }catch(JSONException e) {
                     e.printStackTrace();
                 }
@@ -161,20 +162,20 @@ public class CheckValidDriver extends BaseActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressDialog.dismiss();
-                Log.e("Active", driverProfile.Active + "");
-                Log.e("CompanyID", driverProfile.CompanyID + "");
-                Log.e("DriverID", driverProfile.DriverID + "");
-                Log.e("FirstName", driverProfile.FirstName + "");
-                Log.e("LastName", driverProfile.LastName + "");
-                Log.e("Response", driverProfile.Response + "");
-                Log.e("Webmyne_DeviceType", driverProfile.Webmyne_DeviceType + "");
-                Log.e("Webmyne_DriverIMEI_Number", driverProfile.Webmyne_DriverIMEI_Number + "");
-                Log.e("Webmyne_Latitude", driverProfile.Webmyne_Latitude + "");
-                Log.e("Webmyne_Longitude", driverProfile.Webmyne_Longitude + "");
-                Log.e("Webmyne_NotificationID", driverProfile.Webmyne_NotificationID + "");
-
-                Log.e("Check Valid Driver", driverProfile.Response + "");
+                circleDialog.dismiss();
+//                Log.e("Active", driverProfile.Active + "");
+//                Log.e("CompanyID", driverProfile.CompanyID + "");
+//                Log.e("DriverID", driverProfile.DriverID + "");
+//                Log.e("FirstName", driverProfile.FirstName + "");
+//                Log.e("LastName", driverProfile.LastName + "");
+//                Log.e("Response", driverProfile.Response + "");
+//                Log.e("Webmyne_DeviceType", driverProfile.Webmyne_DeviceType + "");
+//                Log.e("Webmyne_DriverIMEI_Number", driverProfile.Webmyne_DriverIMEI_Number + "");
+//                Log.e("Webmyne_Latitude", driverProfile.Webmyne_Latitude + "");
+//                Log.e("Webmyne_Longitude", driverProfile.Webmyne_Longitude + "");
+//                Log.e("Webmyne_NotificationID", driverProfile.Webmyne_NotificationID + "");
+//
+//                Log.e("Check Valid Driver", driverProfile.Response + "");
 //                Toast.makeText(CheckValidDriver.this, driverProfile.Webmyne_DriverIMEI_Number + "", Toast.LENGTH_LONG).show();
 //                Toast.makeText(CheckValidDriver.this, driverProfile.Response + "", Toast.LENGTH_LONG).show();
                 if (driverProfile.Response.equalsIgnoreCase("Success")) {
@@ -201,8 +202,10 @@ public class CheckValidDriver extends BaseActivity {
 
                     // show alert when driver's imei number is not match with ddatabase
                     AlertDialog.Builder alert = new AlertDialog.Builder(CheckValidDriver.this);
-                    alert.setTitle("Invalid Driver");
-                    alert.setMessage("Driver not Found");
+                    alert.setTitle("Unregistered Driver");
+                    alert.setMessage("Oh !!\n" +
+                            "It seems that you are not a register yourself as a cab in our organization.\n" +
+                            "please contact our organization and register yourself.");
                     alert.setNegativeButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

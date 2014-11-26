@@ -529,7 +529,7 @@
             app:customTypeface="@string/bold"
             tools:ignore="MissingPrefix"
             android:text="COMPLETE TRIP"
-            android:background="@color/actionbar"
+            android:background="@drawable/button_selector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />

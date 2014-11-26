@@ -42,7 +42,7 @@
         android:id="@+id/txtDateSelection"
         android:padding="10dp"
         android:gravity="center"
-        android:background="@color/actionbar"
+        android:background="@drawable/button_selector"
         android:layout_alignParentBottom="true"
         android:textSize="@dimen/text_size_medium"
         android:textColor="@android:color/black"

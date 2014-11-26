@@ -49,6 +49,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
+            android:screenOrientation="portrait"
             android:name="com.webmyne.riteway_driver.home.Launcher"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" >
@@ -59,10 +60,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name="com.webmyne.riteway_driver.home.DrawerActivity"
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name="com.webmyne.riteway_driver.my_orders.OrderDetailActivity"
             android:label="@string/title_activity_order_detail" >
         </activity>
@@ -80,10 +83,12 @@
         <service android:name="com.webmyne.riteway_driver.gcm.GcmMessageHandler" />
 
         <activity
+            android:screenOrientation="portrait"
             android:name="com.webmyne.riteway_driver.receipt_and_feedback.ReceiptAndFeedbackActivity"
             android:label="@string/title_activity_receipt_and_feedback" >
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name=".home.CheckValidDriver"
             android:windowSoftInputMode="adjustPan"
             android:label="@string/title_activity_check_imeinumber" >

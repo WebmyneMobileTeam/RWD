@@ -176,7 +176,7 @@ public class NavigationDrawerAdapter extends BaseAdapter {
         }
         if(position==1) {
 
-            Log.e("badge value:.....",badgevalue+"");
+//            Log.e("badge value:.....",badgevalue+"");
             if(badgevalue !=null && (!badgevalue.equalsIgnoreCase("0"))){
                 holder.txtBadgeValue.setVisibility(View.VISIBLE);
                 holder.txtBadgeValue.setText(badgevalue+"");
@@ -256,7 +256,7 @@ public class NavigationDrawerAdapter extends BaseAdapter {
     protected void onStop() {
         super.onStop();
         try {
-            Log.e("timer: ","timer cancelled");
+//            Log.e("timer: ", "timer cancelled");
             MyOrdersFragment.timer.cancel();
             SettingsFragment.timer.cancel();
         } catch (Exception e){

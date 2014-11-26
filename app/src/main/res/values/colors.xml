@@ -3,6 +3,7 @@
 
   <!--  <color name="actionbar">#62aa60</color> -->
     <color name="actionbar">#F9AF18</color>
+    <color name="button_press">#FF8F00</color>
     <color name="activity_background">#eaeaea</color>
     <color name="divider">#cecece</color>
     <color name="gray_color">#666666</color>

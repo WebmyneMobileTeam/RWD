@@ -44,7 +44,7 @@ public class SharedPreferenceNotification {
         Gson gson = new Gson();
         String jsonFavorites = gson.toJson(driverNotifications);
         editor.putString(PREF_VALUE, jsonFavorites);
-        Log.e(" list:", jsonFavorites + "");
+//        Log.e(" list:", jsonFavorites + "");
         editor.commit();
     }
 
@@ -56,7 +56,7 @@ public class SharedPreferenceNotification {
         Gson gson = new Gson();
         DriverNotification[] favoriteItems = gson.fromJson(jsonFavorites,DriverNotification[].class);
         notificationList = new ArrayList<DriverNotification>(Arrays.asList(favoriteItems));
-        Log.e(" array", notificationList + "");
+//        Log.e(" array", notificationList + "");
         return (ArrayList<DriverNotification>) notificationList;
     }
 

@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
 import com.webmyne.riteway_driver.customViews.CallWebService;
+import com.webmyne.riteway_driver.customViews.CircleDialog;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.API;
@@ -64,7 +65,8 @@ public class MyOrdersFragment extends Fragment {
     private ViewPager pager;
     private int badgeValue=0;
     private MyPagerAdapter adapter;
-    private ProgressDialog progressDialog;
+//    private ProgressDialog progressDialog;
+    private CircleDialog circleDialog;
     private ArrayList<Trip> tripArrayList;
     public static Timer timer;
     private ArrayList<DriverNotification> notificationList;
@@ -88,7 +90,7 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        gpsTracker = new GPSTracker(getActivity());
+
     }
 
     @Override
@@ -102,14 +104,14 @@ public class MyOrdersFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+        gpsTracker = new GPSTracker(getActivity());
         sharedPreferenceTrips=new SharedPreferenceTrips();
         sharedPreferenceNotification=new SharedPreferenceNotification();
 
         try {
             if (SettingsFragment.timer != null) {
                 SettingsFragment.timer.cancel();
-                Log.e("SettingsFragment.timer", "canceled");
+//                Log.e("SettingsFragment.timer", "canceled");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,6 +129,7 @@ public class MyOrdersFragment extends Fragment {
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
+
                             updateDriverLocation();
                         }
                     },0,1000*60*Integer.parseInt(updatedTimeInterval));
@@ -164,9 +167,15 @@ public class MyOrdersFragment extends Fragment {
             updatedDriverLatitude=gpsTracker.latitude;
             updatedDriverLongitude=gpsTracker.longitude;
         }
+        try {
+//            Log.e("timer: ", "timer cancelled");
 
-        Log.e("latitude main: ",updatedDriverLatitude+"");
-        Log.e("Longitude main: ",updatedDriverLongitude+"");
+            SettingsFragment.timer.cancel();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+//        Log.e("latitude myorder: ",updatedDriverLatitude+"");
+//        Log.e("Longitude myorder: ",updatedDriverLongitude+"");
 
         new AsyncTask<Void,Void,Void>(){
 
@@ -174,7 +183,6 @@ public class MyOrdersFragment extends Fragment {
             protected Void doInBackground(Void... params) {
                 JSONObject driverCurrentLocation = new JSONObject();
                 try {
-
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
                     DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
                     driverCurrentLocation.put("DriverID", driverProfile.DriverID);
@@ -186,7 +194,7 @@ public class MyOrdersFragment extends Fragment {
                 }
                 Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                Log.e("responseMessage:",responseMessage.Response+"");
+//                Log.e("responseMessage:",responseMessage.Response+"");
                 return null;
 
             }
@@ -203,11 +211,10 @@ public class MyOrdersFragment extends Fragment {
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
         DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
 
-        Log.e("url: ", AppConstants.DriverTrips+driverProfile.DriverID );
-        progressDialog=new ProgressDialog(getActivity());
-        progressDialog.setCancelable(true);
-        progressDialog.setMessage("Loading...");
-        progressDialog.show();
+//        Log.e("url: ", AppConstants.DriverTrips+driverProfile.DriverID );
+        circleDialog=new CircleDialog(getActivity(),0);
+        circleDialog.setCancelable(true);
+        circleDialog.show();
 
         new CallWebService(AppConstants.DriverTrips+driverProfile.DriverID , CallWebService.TYPE_JSONARRAY) {
 
@@ -267,14 +274,14 @@ public class MyOrdersFragment extends Fragment {
                         badgeValue=badgeValue+1;
                     }
                     sharedPreferenceNotification.saveNotification(getActivity(),notificationList.get(i));
-                    Log.e("notification id: ",notificationList.get(i).notificationStatus+"");
+//                    Log.e("notification id: ",notificationList.get(i).notificationStatus+"");
                 }
-                Log.e("Badge value: ",badgeValue+"");
+//                Log.e("Badge value: ",badgeValue+"");
                 SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("badge_value",getActivity().MODE_PRIVATE);
                 SharedPreferences.Editor editor=preferencesTimeInterval.edit();
                 editor.putString("badge_value",badgeValue+"");
                 editor.commit();
-                progressDialog.dismiss();
+                circleDialog.dismiss();
             }
 
             @Override

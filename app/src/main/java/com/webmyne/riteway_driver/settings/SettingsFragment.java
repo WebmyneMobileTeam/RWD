@@ -26,6 +26,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.GsonBuilder;
 import com.webmyne.riteway_driver.application.MyApplication;
+import com.webmyne.riteway_driver.customViews.CircleDialog;
 import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.customViews.ListDialog;
 import com.webmyne.riteway_driver.R;
@@ -50,7 +51,8 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     private TextView txtUpdateTime;
     private ArrayList<String> timeList;
     private Switch driverStatusSwitch;
-    private ProgressDialog progressDialog;
+    private CircleDialog circleDialog;
+
     private GPSTracker gpsTracker;
     private double updatedDriverLatitude;
     private double updatedDriverLongitude;
@@ -69,7 +71,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        gpsTracker = new GPSTracker(getActivity());
+
         timeList=new ArrayList<String>();
         timeList.add("1");
         timeList.add("2");
@@ -139,16 +141,22 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         return  isConnected;
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        gpsTracker = new GPSTracker(getActivity());
+    }
+
     public void updateDriverStatus(){
 
         new AsyncTask<Void,Void,Void>(){
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                progressDialog=new ProgressDialog(getActivity());
-                progressDialog.setCancelable(false);
-                progressDialog.setMessage("Loading...");
-                progressDialog.show();
+                circleDialog=new CircleDialog(getActivity(),0);
+                circleDialog.setCancelable(true);
+                circleDialog.show();
             }
 
             @Override
@@ -161,7 +169,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
 
                     driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
                     driverStatusObject.put("DriverID", driverProfile.DriverID);
-                    Log.e("driverStatusObject: ", driverStatusObject + "");
+//                    Log.e("driverStatusObject: ", driverStatusObject + "");
 
                 }catch(JSONException e) {
                     e.printStackTrace();
@@ -169,7 +177,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
 
                 Reader reader = API.callWebservicePost(AppConstants.DriverStatus, driverStatusObject.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                Log.e("responseMessage:",responseMessage.Response+"");
+//                Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
 
                 return null;
@@ -193,7 +201,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                progressDialog.dismiss();
+                circleDialog.dismiss();
                 SharedPreferences preferences = getActivity().getSharedPreferences("driver_status", getActivity().MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putBoolean("driver_status", AppConstants.driverStatusBoolValue);
@@ -215,7 +223,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         try {
             if (MyOrdersFragment.timer != null) {
                 MyOrdersFragment.timer.cancel();
-                Log.e("MyOrdersFragment.timer", "canceled");
+//                Log.e("MyOrdersFragment.timer", "canceled");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -229,6 +237,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
+
                             updateDriverLocation();
                         }
                     },0,1000*60*Integer.parseInt(updatedTimeInterval));
@@ -243,9 +252,15 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
             updatedDriverLatitude=gpsTracker.latitude;
             updatedDriverLongitude=gpsTracker.longitude;
         }
+        try {
+//            Log.e("timer: ", "timer cancelled");
+            MyOrdersFragment.timer.cancel();
 
-        Log.e("latitude main: ",updatedDriverLatitude+"");
-        Log.e("Longitude main: ",updatedDriverLongitude+"");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+//        Log.e("latitude setting: ",updatedDriverLatitude+"");
+//        Log.e("Longitude setting: ",updatedDriverLongitude+"");
 
 
         new AsyncTask<Void,Void,Void>(){
@@ -267,7 +282,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
                 }
                 Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-                Log.e("responseMessage:",responseMessage.Response+"");
+//                Log.e("responseMessage:",responseMessage.Response+"");
 
                 return null;
 
