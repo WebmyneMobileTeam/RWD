@@ -168,9 +168,9 @@ public class SettingsFragment extends Fragment  {
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
                     DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
 
-                    driverStatusObject.put("Active", AppConstants.driverStatusBoolValue);
+                    driverStatusObject.put("Webmyne_Active", AppConstants.driverStatusBoolValue);
                     driverStatusObject.put("DriverID", driverProfile.DriverID);
-//                    Log.e("driverStatusObject: ", driverStatusObject + "");
+                    Log.e("driverStatusObject: ", driverStatusObject + "");
 
                 }catch(JSONException e) {
                     e.printStackTrace();
@@ -178,7 +178,7 @@ public class SettingsFragment extends Fragment  {
 
                 Reader reader = API.callWebservicePost(AppConstants.DriverStatus, driverStatusObject.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-//                Log.e("responseMessage:",responseMessage.Response+"");
+                Log.e("responseMessage:",responseMessage.Response+"");
                 handlePostData();
 
                 return null;

@@ -14,7 +14,8 @@ public class AppConstants {
     public static final String DriverTrips="http://ws-srv-net.in.webmyne.com/Applications/Android/RiteWayServices/Driver.svc/json/DriverTrips/";
     public static final String GetDriverNotifications="http://ws-srv-net.in.webmyne.com/Applications/Android/RiteWayServices/Driver.svc/json/GetDriverNotifications/";
     public static final String DriverNotificationsStatusChanged="http://ws-srv-net.in.webmyne.com/Applications/Android/RiteWayServices/Driver.svc/json/DriverNotificationsStatusChanged/";
-
+    //GET Current rates
+    public static final String CurrentRate ="http://ws-srv-net.in.webmyne.com/Applications/Android/RiteWayServices/Driver.svc/json/CurrentRate";
     public static  boolean driverStatusBoolValue=true;
     public static final String deviceType="Android";
 

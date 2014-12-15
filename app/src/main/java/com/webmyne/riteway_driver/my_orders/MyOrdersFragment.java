@@ -99,23 +99,54 @@ public class MyOrdersFragment extends Fragment {
         sharedPreferenceTrips=new SharedPreferenceTrips();
         sharedPreferenceNotification=new SharedPreferenceNotification();
 
-        try {
-            if (SettingsFragment.timer != null) {
-                SettingsFragment.timer.cancel();
-//                Log.e("SettingsFragment.timer", "canceled");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        getCurrentRate();
+//        try {
+//            if (SettingsFragment.timer != null) {
+//                SettingsFragment.timer.cancel();
+////                Log.e("SettingsFragment.timer", "canceled");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+
+        if(isConnected()==true) {
+            getTripList();
+        } else {
+            Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
         }
 
-        new CountDownTimer(3000, 1000) {
-            @Override
-            public void onFinish() {
+    }
 
+
+    public void getCurrentRate() {
+
+        new CallWebService(AppConstants.CurrentRate, CallWebService.TYPE_JSONOBJECT) {
+
+            @Override
+            public void response(String response) {
+
+                CurrentRate currentRates= new GsonBuilder().create().fromJson(response, CurrentRate.class);
+
+//                Log.e("Rate: ",currentRates.Rate+"");
+//                Log.e("TripFee: ",currentRates.TripFee+"");
+
+                SharedPreferences preferences = getActivity().getSharedPreferences("current_rate",getActivity().MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("rate", currentRates.Rate+"");
+                editor.putString("tripFee", currentRates.TripFee+"");
+                if(currentRates.TimeInterval !=null) {
+                    editor.putString("timeInterval", currentRates.TimeInterval + "");
+                } else {
+                    editor.putString("timeInterval", "3");
+                }
+                editor.commit();
+
+                final SharedPreferences preferencesRate = getActivity().getSharedPreferences("current_rate",getActivity().MODE_PRIVATE);
+                String updatedTimeInterval=preferencesRate.getString("timeInterval","3");
+                Log.e("","");
+//                String updatedTimeInterval="3";
                 try {
-//                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-//                    final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
-                    String updatedTimeInterval="5";
                     timer=new Timer();
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
@@ -134,17 +165,10 @@ public class MyOrdersFragment extends Fragment {
             }
 
             @Override
-            public void onTick(long millisUntilFinished) {
+            public void error(VolleyError error) {
+
             }
         }.start();
-
-
-        if(isConnected()==true) {
-            getTripList();
-        } else {
-            Toast.makeText(getActivity(), "Internet Connection Unavailable", Toast.LENGTH_SHORT).show();
-        }
-
     }
 
     public  boolean isConnected() {
@@ -168,8 +192,8 @@ public class MyOrdersFragment extends Fragment {
         } catch (Exception e){
             e.printStackTrace();
         }
-//        Log.e("latitude myorder: ",updatedDriverLatitude+"");
-//        Log.e("Longitude myorder: ",updatedDriverLongitude+"");
+        Log.e("latitude myorder: ",updatedDriverLatitude+"");
+        Log.e("Longitude myorder: ",updatedDriverLongitude+"");
 
         new AsyncTask<Void,Void,Void>(){
 
@@ -188,7 +212,7 @@ public class MyOrdersFragment extends Fragment {
                 }
                 Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
                 ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-//                Log.e("responseMessage:",responseMessage.Response+"");
+                Log.e("responseMessage:",responseMessage.Response+"");
                 return null;
 
             }

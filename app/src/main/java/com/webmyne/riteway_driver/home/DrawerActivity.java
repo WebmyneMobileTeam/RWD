@@ -259,7 +259,7 @@ public class NavigationDrawerAdapter extends BaseAdapter {
         try {
 //            Log.e("timer: ", "timer cancelled");
             MyOrdersFragment.timer.cancel();
-            SettingsFragment.timer.cancel();
+
         } catch (Exception e){
             e.printStackTrace();
         }
