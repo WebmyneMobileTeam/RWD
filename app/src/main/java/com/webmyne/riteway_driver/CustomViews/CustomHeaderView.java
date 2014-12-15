@@ -36,7 +36,7 @@ public class CustomHeaderView extends LinearLayout{
         inflater.inflate(R.layout.item_header, this, true);
         TextView tv = (TextView)this.findViewById(R.id.txtHeaderCustomView);
         tv.setText(titleText);
-        TextView tvSubTitle = (TextView)this.findViewById(R.id.txtHeaderSubTitle);
+//        TextView tvSubTitle = (TextView)this.findViewById(R.id.txtHeaderSubTitle);
 
     }
 

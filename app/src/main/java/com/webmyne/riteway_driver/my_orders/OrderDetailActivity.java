@@ -23,11 +23,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.GsonBuilder;
+import com.webmyne.riteway_driver.CustomViews.CircleDialog;
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
 import com.webmyne.riteway_driver.application.MyApplication;
-import com.webmyne.riteway_driver.customViews.CircleDialog;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+
 import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.CustomTypeface;
@@ -185,7 +186,7 @@ public class OrderDetailActivity extends BaseActivity {
             currentTripPickupNote.setText(currentTrip.PickupNote);
             currentTripDate.setText(getFormatedDate());
             currentTripTime.setText(currentTrip.PickupTime);
-            currentTripDistance.setText(currentTrip.TripDistance+" kms");
+            currentTripDistance.setText(Double.parseDouble(currentTrip.TripDistance)*0.6214+" miles");
 
             if(currentTrip.PaymentType !=null){
                 currentTripPaymentType.setVisibility(View.VISIBLE);

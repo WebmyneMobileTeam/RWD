@@ -19,8 +19,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
 import com.webmyne.riteway_driver.R;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
 import com.webmyne.riteway_driver.trip.CurrentTripFragment;

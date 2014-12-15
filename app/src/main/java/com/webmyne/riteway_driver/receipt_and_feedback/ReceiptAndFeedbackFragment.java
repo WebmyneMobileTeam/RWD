@@ -27,11 +27,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.GsonBuilder;
+import com.webmyne.riteway_driver.CustomViews.CircleDialog;
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
+import com.webmyne.riteway_driver.CustomViews.ListDialog;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.MyApplication;
-import com.webmyne.riteway_driver.customViews.CircleDialog;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
-import com.webmyne.riteway_driver.customViews.ListDialog;
+
 import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.ResponseMessage;

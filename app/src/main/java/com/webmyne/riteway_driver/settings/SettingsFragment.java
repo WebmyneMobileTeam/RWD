@@ -25,10 +25,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.GsonBuilder;
+import com.webmyne.riteway_driver.CustomViews.CircleDialog;
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
+import com.webmyne.riteway_driver.CustomViews.ListDialog;
 import com.webmyne.riteway_driver.application.MyApplication;
-import com.webmyne.riteway_driver.customViews.CircleDialog;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
-import com.webmyne.riteway_driver.customViews.ListDialog;
+
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
@@ -46,10 +47,10 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SettingsFragment extends Fragment implements ListDialog.setSelectedListner {
-    private LinearLayout linearIntervalTime;
-    private TextView txtUpdateTime;
-    private ArrayList<String> timeList;
+public class SettingsFragment extends Fragment  {
+//    private LinearLayout linearIntervalTime;
+//    private TextView txtUpdateTime;
+//    private ArrayList<String> timeList;
     private Switch driverStatusSwitch;
     private CircleDialog circleDialog;
 
@@ -72,13 +73,13 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         super.onCreate(savedInstanceState);
 
 
-        timeList=new ArrayList<String>();
-        timeList.add("1");
-        timeList.add("2");
-        timeList.add("3");
-        timeList.add("5");
-        timeList.add("7");
-        timeList.add("10");
+//        timeList=new ArrayList<String>();
+//        timeList.add("1");
+//        timeList.add("2");
+//        timeList.add("3");
+//        timeList.add("5");
+//        timeList.add("7");
+//        timeList.add("10");
     }
 
     @Override
@@ -92,23 +93,23 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
             SharedPreferences preferences = getActivity().getSharedPreferences("driver_status", getActivity().MODE_PRIVATE);
             driverStatusSwitch.setChecked(preferences.getBoolean("driver_status", true));
 
-            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval", getActivity().MODE_PRIVATE);
-            txtUpdateTime.setText(preferencesTimeInterval.getString("driver_time_interval", "5") + " minutes");
+//            SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval", getActivity().MODE_PRIVATE);
+//            txtUpdateTime.setText(preferencesTimeInterval.getString("driver_time_interval", "5") + " minutes");
 
         return convertView;
     }
 
     private void initView(View convertView){
-        linearIntervalTime=(LinearLayout)convertView.findViewById(R.id.linearIntervalTime);
-        txtUpdateTime=(TextView)convertView.findViewById(R.id.txtUpdateTime);
+//        linearIntervalTime=(LinearLayout)convertView.findViewById(R.id.linearIntervalTime);
+//        txtUpdateTime=(TextView)convertView.findViewById(R.id.txtUpdateTime);
         driverStatusSwitch=(Switch)convertView.findViewById(R.id.driverStatusSwitch);
 
-        linearIntervalTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDialog();
-            }
-        });
+//        linearIntervalTime.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                showDialog();
+//            }
+//        });
 
         driverStatusSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,16 +186,7 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         }.execute();
 
     }
-    public void showDialog() {
 
-        ListDialog listDialog = new ListDialog(getActivity(), android.R.style.Theme_Translucent_NoTitleBar);
-        listDialog.setCancelable(true);
-        listDialog.setCanceledOnTouchOutside(true);
-        listDialog.title("SELECT TIME");
-        listDialog.setItems(timeList);
-        listDialog.setSelectedListner(this);
-        listDialog.show();
-    }
 
 
     public void handlePostData() {
@@ -211,86 +203,99 @@ public class SettingsFragment extends Fragment implements ListDialog.setSelected
         });
     }
 
-    @Override
-    public void selected(final String value) {
 
-        txtUpdateTime.setText(value+" minutes");
-        SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-        SharedPreferences.Editor editor=preferencesTimeInterval.edit();
-        editor.putString("driver_time_interval",value);
-        editor.commit();
-
-        try {
-            if (MyOrdersFragment.timer != null) {
-                MyOrdersFragment.timer.cancel();
-//                Log.e("MyOrdersFragment.timer", "canceled");
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-                try {
-                    SharedPreferences preferencesTimeIntervalUpdate = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-                    final String updatedTimeInterval=preferencesTimeIntervalUpdate.getString("driver_time_interval", "5");
-
-                    timer=new Timer();
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-
-                            updateDriverLocation();
-                        }
-                    },0,1000*60*Integer.parseInt(updatedTimeInterval));
-                }catch (NullPointerException e){
-                    e.printStackTrace();
-                }
-    }
-
-    public void updateDriverLocation() {
-
-        if (gpsTracker.canGetLocation()) {
-            updatedDriverLatitude=gpsTracker.latitude;
-            updatedDriverLongitude=gpsTracker.longitude;
-        }
-        try {
-//            Log.e("timer: ", "timer cancelled");
-            MyOrdersFragment.timer.cancel();
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-//        Log.e("latitude setting: ",updatedDriverLatitude+"");
-//        Log.e("Longitude setting: ",updatedDriverLongitude+"");
+//    public void showDialog() {
+//
+//        ListDialog listDialog = new ListDialog(getActivity(), android.R.style.Theme_Translucent_NoTitleBar);
+//        listDialog.setCancelable(true);
+//        listDialog.setCanceledOnTouchOutside(true);
+//        listDialog.title("SELECT TIME");
+//        listDialog.setItems(timeList);
+//        listDialog.setSelectedListner(this);
+//        listDialog.show();
+//    }
 
 
-        new AsyncTask<Void,Void,Void>(){
+//    @Override
+//    public void selected(final String value) {
+//
+//        txtUpdateTime.setText(value+" minutes");
+//        SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+//        SharedPreferences.Editor editor=preferencesTimeInterval.edit();
+//        editor.putString("driver_time_interval",value);
+//        editor.commit();
+//
+//        try {
+//            if (MyOrdersFragment.timer != null) {
+//                MyOrdersFragment.timer.cancel();
+////                Log.e("MyOrdersFragment.timer", "canceled");
+//            }
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//
+//                try {
+//                    SharedPreferences preferencesTimeIntervalUpdate = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+//                    final String updatedTimeInterval=preferencesTimeIntervalUpdate.getString("driver_time_interval", "5");
 
-            @Override
-            protected Void doInBackground(Void... params) {
-                JSONObject driverCurrentLocation = new JSONObject();
-                try {
+//                    timer=new Timer();
+//                    timer.scheduleAtFixedRate(new TimerTask() {
+//                        @Override
+//                        public void run() {
+//
+//                            updateDriverLocation();
+//                        }
+//                    },0,1000*60*Integer.parseInt(updatedTimeInterval));
+//                }catch (NullPointerException e){
+//                    e.printStackTrace();
+//                }
+//    }
 
-                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
-                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
-
-                    driverCurrentLocation.put("DriverID", driverProfile.DriverID);
-                    driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
-                    driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
-
-                }catch(JSONException e) {
-                    e.printStackTrace();
-                }
-                Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
-                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
-//                Log.e("responseMessage:",responseMessage.Response+"");
-
-                return null;
-
-            }
-
-
-        }.execute();
-
-    }
+//    public void updateDriverLocation() {
+//
+//        if (gpsTracker.canGetLocation()) {
+//            updatedDriverLatitude=gpsTracker.latitude;
+//            updatedDriverLongitude=gpsTracker.longitude;
+//        }
+//        try {
+////            Log.e("timer: ", "timer cancelled");
+//            MyOrdersFragment.timer.cancel();
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
+////        Log.e("latitude setting: ",updatedDriverLatitude+"");
+////        Log.e("Longitude setting: ",updatedDriverLongitude+"");
+//
+//
+//        new AsyncTask<Void,Void,Void>(){
+//
+//            @Override
+//            protected Void doInBackground(Void... params) {
+//                JSONObject driverCurrentLocation = new JSONObject();
+//                try {
+//
+//                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "driver_data", 0);
+//                    DriverProfile driverProfile=complexPreferences.getObject("driver_data", DriverProfile.class);
+//
+//                    driverCurrentLocation.put("DriverID", driverProfile.DriverID);
+//                    driverCurrentLocation.put("Webmyne_Latitude", updatedDriverLatitude+"");
+//                    driverCurrentLocation.put("Webmyne_Longitude",updatedDriverLongitude+"");
+//
+//                }catch(JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                Reader reader = API.callWebservicePost(AppConstants.DriverCurrentLocation, driverCurrentLocation.toString());
+//                ResponseMessage responseMessage = new GsonBuilder().create().fromJson(reader, ResponseMessage.class);
+////                Log.e("responseMessage:",responseMessage.Response+"");
+//
+//                return null;
+//
+//            }
+//
+//
+//        }.execute();
+//
+//    }
 
 }

@@ -22,10 +22,11 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.webmyne.riteway_driver.CustomViews.CallWebService;
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
+import com.webmyne.riteway_driver.CustomViews.ListDialog;
 import com.webmyne.riteway_driver.R;
-import com.webmyne.riteway_driver.customViews.CallWebService;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
-import com.webmyne.riteway_driver.customViews.ListDialog;
+
 import com.webmyne.riteway_driver.home.DrawerActivity;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.AppConstants;

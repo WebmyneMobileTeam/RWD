@@ -19,10 +19,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.GsonBuilder;
+import com.webmyne.riteway_driver.CustomViews.CircleDialog;
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
 import com.webmyne.riteway_driver.R;
 import com.webmyne.riteway_driver.application.BaseActivity;
-import com.webmyne.riteway_driver.customViews.CircleDialog;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
+
 import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.CustomTypeface;

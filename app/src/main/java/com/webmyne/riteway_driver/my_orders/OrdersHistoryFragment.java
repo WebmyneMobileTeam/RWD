@@ -13,9 +13,10 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
+import com.webmyne.riteway_driver.CustomViews.ListDialog;
 import com.webmyne.riteway_driver.R;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
-import com.webmyne.riteway_driver.customViews.ListDialog;
+
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.SharedPreferenceTrips;
 

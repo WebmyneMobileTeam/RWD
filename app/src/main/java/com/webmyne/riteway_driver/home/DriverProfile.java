@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 public class DriverProfile {
 
 
-    @SerializedName("Active")
+    @SerializedName("Webmyne_Active")
     public String Active;
     @SerializedName("CompanyID")
     public String CompanyID;

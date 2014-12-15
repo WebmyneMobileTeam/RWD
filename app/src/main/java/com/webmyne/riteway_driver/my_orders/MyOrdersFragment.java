@@ -1,9 +1,7 @@
 package com.webmyne.riteway_driver.my_orders;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -21,24 +19,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.webmyne.riteway_driver.CustomViews.CallWebService;
+import com.webmyne.riteway_driver.CustomViews.CircleDialog;
+import com.webmyne.riteway_driver.CustomViews.ComplexPreferences;
 import com.webmyne.riteway_driver.R;
-import com.webmyne.riteway_driver.application.MyApplication;
-import com.webmyne.riteway_driver.customViews.CallWebService;
-import com.webmyne.riteway_driver.customViews.CircleDialog;
-import com.webmyne.riteway_driver.customViews.ComplexPreferences;
 import com.webmyne.riteway_driver.home.DriverProfile;
 import com.webmyne.riteway_driver.model.API;
 import com.webmyne.riteway_driver.model.AppConstants;
 import com.webmyne.riteway_driver.model.GPSTracker;
-import com.webmyne.riteway_driver.model.MapController;
 import com.webmyne.riteway_driver.model.PagerSlidingTabStrip;
 import com.webmyne.riteway_driver.model.ResponseMessage;
 import com.webmyne.riteway_driver.model.SharedPreferenceNotification;
@@ -122,15 +113,18 @@ public class MyOrdersFragment extends Fragment {
             public void onFinish() {
 
                 try {
-                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
-                    final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
-
+//                    SharedPreferences preferencesTimeInterval = getActivity().getSharedPreferences("driver_time_interval",getActivity().MODE_PRIVATE);
+//                    final String updatedTimeInterval=preferencesTimeInterval.getString("driver_time_interval", "5");
+                    String updatedTimeInterval="5";
                     timer=new Timer();
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
 
                             updateDriverLocation();
+                            //updatedTimeInterval from API
+                            //TODO
+
                         }
                     },0,1000*60*Integer.parseInt(updatedTimeInterval));
 
