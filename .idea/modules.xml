@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RWD.iml" filepath="$PROJECT_DIR$/RWD.iml" />
-      <module fileurl="file://$PROJECT_DIR$/RiteWay-Driver.iml" filepath="$PROJECT_DIR$/RiteWay-Driver.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
 </project>
-

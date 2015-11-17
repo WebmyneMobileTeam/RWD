@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'webmyne'
+            keyPassword 'webmyne'
+            storeFile file('D:/webmyne.jks')
+            storePassword 'webmyne'
+        }
+    }
     compileSdkVersion 20
     buildToolsVersion "20.0.0"
 
